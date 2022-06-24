@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from urllib.parse import parse_qsl
 from aiida.parsers import Parser
 
 class DftkParser(Parser):
@@ -8,3 +7,4 @@ class DftkParser(Parser):
     def parse(self, **kwargs):
         """Parse DFTK output files."""
         pass
+
