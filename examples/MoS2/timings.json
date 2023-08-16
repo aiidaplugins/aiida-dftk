@@ -1,0 +1,423 @@
+{
+    "total_time_ns": 25046404102,
+    "total_allocated_bytes": 4451984536,
+    "time_ns": 0,
+    "n_calls": 0,
+    "allocated_bytes": 0,
+    "inner_timers": {
+        "PlaneWaveBasis": {
+            "total_time_ns": 3472977789,
+            "total_allocated_bytes": 542810617,
+            "time_ns": 4672417705,
+            "n_calls": 2,
+            "allocated_bytes": 630939275,
+            "inner_timers": {
+                "Instantiation Hartree": {
+                    "total_time_ns": 2403966,
+                    "total_allocated_bytes": 7296,
+                    "time_ns": 3844505,
+                    "n_calls": 2,
+                    "allocated_bytes": 7786864,
+                    "inner_timers": {
+                        "enforce_real!": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 2403966,
+                            "n_calls": 2,
+                            "allocated_bytes": 7296,
+                            "inner_timers": {
+                            }
+                        }
+                    }
+                },
+                "build_kpoints": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 13750881,
+                    "n_calls": 2,
+                    "allocated_bytes": 18752073,
+                    "inner_timers": {
+                    }
+                },
+                "Instantiation AtomicNonlocal": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 812041588,
+                    "n_calls": 2,
+                    "allocated_bytes": 105529104,
+                    "inner_timers": {
+                    }
+                },
+                "Instantiation PspCorrection": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 16848543,
+                    "n_calls": 2,
+                    "allocated_bytes": 1038063,
+                    "inner_timers": {
+                    }
+                },
+                "Instantiation Kinetic": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 425203,
+                    "n_calls": 2,
+                    "allocated_bytes": 1146992,
+                    "inner_timers": {
+                    }
+                },
+                "Instantiation Entropy": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 13011,
+                    "n_calls": 2,
+                    "allocated_bytes": 192,
+                    "inner_timers": {
+                    }
+                },
+                "Instantiation AtomicLocal": {
+                    "total_time_ns": 2264750,
+                    "total_allocated_bytes": 7296,
+                    "time_ns": 1176464125,
+                    "n_calls": 2,
+                    "allocated_bytes": 181829980,
+                    "inner_timers": {
+                        "enforce_real!": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 2264750,
+                            "n_calls": 2,
+                            "allocated_bytes": 7296,
+                            "inner_timers": {
+                            }
+                        }
+                    }
+                },
+                "Instantiation Ewald": {
+                    "total_time_ns": 170498196,
+                    "total_allocated_bytes": 134784080,
+                    "time_ns": 170521298,
+                    "n_calls": 2,
+                    "allocated_bytes": 134785088,
+                    "inner_timers": {
+                        "precomp: Ewald": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 170498196,
+                            "n_calls": 2,
+                            "allocated_bytes": 134784080,
+                            "inner_timers": {
+                            }
+                        }
+                    }
+                },
+                "Instantiation Xc": {
+                    "total_time_ns": 2292759,
+                    "total_allocated_bytes": 7296,
+                    "time_ns": 1279068635,
+                    "n_calls": 2,
+                    "allocated_bytes": 91942261,
+                    "inner_timers": {
+                        "enforce_real!": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 2292759,
+                            "n_calls": 2,
+                            "allocated_bytes": 7296,
+                            "inner_timers": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "spglib_get_symmetry": {
+            "total_time_ns": 0,
+            "total_allocated_bytes": 0,
+            "time_ns": 1275462,
+            "n_calls": 1,
+            "allocated_bytes": 57536,
+            "inner_timers": {
+            }
+        },
+        "compute_forces": {
+            "total_time_ns": 3642331867,
+            "total_allocated_bytes": 481777227,
+            "time_ns": 4827231167,
+            "n_calls": 1,
+            "allocated_bytes": 651502452,
+            "inner_timers": {
+                "forces: xc": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 621855894,
+                    "n_calls": 1,
+                    "allocated_bytes": 124688192,
+                    "inner_timers": {
+                    }
+                },
+                "forces: nonlocal": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 871531494,
+                    "n_calls": 1,
+                    "allocated_bytes": 305848279,
+                    "inner_timers": {
+                    }
+                },
+                "forces: local": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 2148944479,
+                    "n_calls": 1,
+                    "allocated_bytes": 51240756,
+                    "inner_timers": {
+                    }
+                }
+            }
+        },
+        "self_consistent_field": {
+            "total_time_ns": 12309703933,
+            "total_allocated_bytes": 2896028807,
+            "time_ns": 15544173700,
+            "n_calls": 1,
+            "allocated_bytes": 3169481625,
+            "inner_timers": {
+                "χ0Mixing": {
+                    "total_time_ns": 604253077,
+                    "total_allocated_bytes": 316033872,
+                    "time_ns": 687132649,
+                    "n_calls": 7,
+                    "allocated_bytes": 489651184,
+                    "inner_timers": {
+                        "apply_kernel": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 66962854,
+                            "n_calls": 28,
+                            "allocated_bytes": 239580480,
+                            "inner_timers": {
+                            }
+                        },
+                        "compute_density": {
+                            "total_time_ns": 201948177,
+                            "total_allocated_bytes": 60047120,
+                            "time_ns": 537290223,
+                            "n_calls": 7,
+                            "allocated_bytes": 76453392,
+                            "inner_timers": {
+                                "symmetrize_ρ": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 201948177,
+                                    "n_calls": 7,
+                                    "allocated_bytes": 60047120,
+                                    "inner_timers": {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "ortho_qr": {
+                    "total_time_ns": 0,
+                    "total_allocated_bytes": 0,
+                    "time_ns": 34195850,
+                    "n_calls": 2,
+                    "allocated_bytes": 7518560,
+                    "inner_timers": {
+                    }
+                },
+                "energy_hamiltonian": {
+                    "total_time_ns": 3436029078,
+                    "total_allocated_bytes": 1403427875,
+                    "time_ns": 3469324858,
+                    "n_calls": 15,
+                    "allocated_bytes": 1497170943,
+                    "inner_timers": {
+                        "ene_ops": {
+                            "total_time_ns": 2924845374,
+                            "total_allocated_bytes": 1383825540,
+                            "time_ns": 3436029078,
+                            "n_calls": 15,
+                            "allocated_bytes": 1403427875,
+                            "inner_timers": {
+                                "ene_ops: local": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 7583282,
+                                    "n_calls": 15,
+                                    "allocated_bytes": 23360400,
+                                    "inner_timers": {
+                                    }
+                                },
+                                "ene_ops: hartree": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 74568909,
+                                    "n_calls": 15,
+                                    "allocated_bytes": 116828054,
+                                    "inner_timers": {
+                                    }
+                                },
+                                "ene_ops: xc": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 2337114799,
+                                    "n_calls": 15,
+                                    "allocated_bytes": 1236516050,
+                                    "inner_timers": {
+                                    }
+                                },
+                                "ene_ops: nonlocal": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 355191595,
+                                    "n_calls": 15,
+                                    "allocated_bytes": 6776342,
+                                    "inner_timers": {
+                                    }
+                                },
+                                "ene_ops: kinetic": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 150386789,
+                                    "n_calls": 15,
+                                    "allocated_bytes": 344694,
+                                    "inner_timers": {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "LOBPCG": {
+                    "total_time_ns": 6635403614,
+                    "total_allocated_bytes": 375098656,
+                    "time_ns": 7393569351,
+                    "n_calls": 14,
+                    "allocated_bytes": 825227416,
+                    "inner_timers": {
+                        "Update residuals": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 131562060,
+                            "n_calls": 69,
+                            "allocated_bytes": 91624704,
+                            "inner_timers": {
+                            }
+                        },
+                        "ortho! X vs Y": {
+                            "total_time_ns": 350672716,
+                            "total_allocated_bytes": 13673592,
+                            "time_ns": 941593169,
+                            "n_calls": 96,
+                            "allocated_bytes": 98029448,
+                            "inner_timers": {
+                                "ortho!": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 350672716,
+                                    "n_calls": 199,
+                                    "allocated_bytes": 13673592,
+                                    "inner_timers": {
+                                    }
+                                }
+                            }
+                        },
+                        "preconditioning": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 56765050,
+                            "n_calls": 69,
+                            "allocated_bytes": 1109232,
+                            "inner_timers": {
+                            }
+                        },
+                        "ortho!": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 55528653,
+                            "n_calls": 14,
+                            "allocated_bytes": 1355088,
+                            "inner_timers": {
+                            }
+                        },
+                        "DftHamiltonian multiplication": {
+                            "total_time_ns": 4777292612,
+                            "total_allocated_bytes": 102928720,
+                            "time_ns": 4879933414,
+                            "n_calls": 69,
+                            "allocated_bytes": 159668656,
+                            "inner_timers": {
+                                "local+kinetic": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 4253389424,
+                                    "n_calls": 1678,
+                                    "allocated_bytes": 1385136,
+                                    "inner_timers": {
+                                    }
+                                },
+                                "nonlocal": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 523903188,
+                                    "n_calls": 69,
+                                    "allocated_bytes": 101543584,
+                                    "inner_timers": {
+                                    }
+                                }
+                            }
+                        },
+                        "rayleigh_ritz": {
+                            "total_time_ns": 20116124,
+                            "total_allocated_bytes": 2884856,
+                            "time_ns": 570021268,
+                            "n_calls": 55,
+                            "allocated_bytes": 23311528,
+                            "inner_timers": {
+                                "ortho!": {
+                                    "total_time_ns": 0,
+                                    "total_allocated_bytes": 0,
+                                    "time_ns": 20116124,
+                                    "n_calls": 55,
+                                    "allocated_bytes": 2884856,
+                                    "inner_timers": {
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "compute_density": {
+                    "total_time_ns": 249332197,
+                    "total_allocated_bytes": 60053664,
+                    "time_ns": 725481225,
+                    "n_calls": 7,
+                    "allocated_bytes": 76460704,
+                    "inner_timers": {
+                        "symmetrize_ρ": {
+                            "total_time_ns": 0,
+                            "total_allocated_bytes": 0,
+                            "time_ns": 249332197,
+                            "n_calls": 7,
+                            "allocated_bytes": 60053664,
+                            "inner_timers": {
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "enforce_real!": {
+            "total_time_ns": 0,
+            "total_allocated_bytes": 0,
+            "time_ns": 1306068,
+            "n_calls": 1,
+            "allocated_bytes": 3648,
+            "inner_timers": {
+            }
+        }
+    }
+}
