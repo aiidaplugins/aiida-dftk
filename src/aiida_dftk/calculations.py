@@ -15,8 +15,8 @@ class DftkCalculation(CalcJob):
     """`CalcJob` implementation for DFTK"""
 
     _DEFAULT_PREFIX = 'DFTK'
-    _DEFAULT_INPUT_EXTENSION = '.json'
-    _DEFAULT_OUTPUT_EXTENSION = '.hdf5'
+    _DEFAULT_INPUT_EXTENSION = 'json'
+    _DEFAULT_OUTPUT_EXTENSION = 'hdf5'
     _PSEUDO_SUBFOLDER = './pseudo/'
 
     @staticmethod
@@ -66,6 +66,7 @@ class DftkCalculation(CalcJob):
         options['resources'].default = {'num_machines': 1, 'num_mpiprocs_per_machine': 1}
         options['input_filename'].default = f'{cls._DEFAULT_PREFIX}.{cls._DEFAULT_INPUT_EXTENSION}'
 
+
         #outputs
         spec.output('output_parameters', valid_type=orm.Dict,
             help='output parameters')
@@ -110,11 +111,19 @@ class DftkCalculation(CalcJob):
     def _generate_cmdline_params(self) -> ty.List[str]:
         # Define the command based on the input settings
         cmd_params = []
-        cmd_params.extend(['--project=/home/max/Desktop/Aiida_DFTK_Test/aiida-dftk/AiidaDFTK.jl', '-e', 'using AiidaDFTK; AiidaDFTK.run()', 'DFTKin.json'])
+        cmd_params.extend(['--project=/home/max/Desktop/Aiida_DFTK_Test/aiida-dftk/AiidaDFTK.jl', '-e', 'using AiidaDFTK; AiidaDFTK.run()', self.metadata.options.input_filename])
         return cmd_params
 
     def _generate_retrieve_list(self, parameters: orm.Dict) -> list:
-        pass
+        """Generate the list of files to retrieve based on the type of calculation requested in the input parameters.
+
+        :param parameters: input parameters
+        :returns: list of files to retreive
+        """
+        parameters = parameters.get_dict()
+        retrieve_list = [f"{item['$function']}{self._DEFAULT_OUTPUT_EXTENSION}" for item in parameters["postscf"]]
+        
+        return retrieve_list
 
     def prepare_for_submission(self, folder):
         """Create the input file(s) from the input nodes.
@@ -132,8 +141,8 @@ class DftkCalculation(CalcJob):
         ]
         input_filecontent, local_copy_list = self._generate_inputdata(*arguments)
 
-        # write DFTKin.json input file
-        input_filename = folder.get_abs_path('DFTKin.json')
+        # write input file
+        input_filename = folder.get_abs_path(self.metadata.options.input_filename)
         with io.open(input_filename, 'w', encoding='utf-8') as stream:
             json.dump(input_filecontent, stream)
 

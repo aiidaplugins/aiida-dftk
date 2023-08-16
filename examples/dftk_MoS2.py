@@ -9,9 +9,9 @@ code = orm.load_code('mpiDFTKtest@juliaMPI_local_direct')  # change the label to
 # Setup the builder
 builder = DFTKCalculation.get_builder()
 #load silicon structure
-cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/Si.cif")
-Si = cif.get_structure()
-builder.structure = Si
+cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/MoS2.cif")
+structure = cif.get_structure()
+builder.structure = structure
 
 #load parameters
 Parameters = orm.Dict({
@@ -20,21 +20,15 @@ Parameters = orm.Dict({
             ":gga_x_pbe",
             ":gga_c_pbe"
         ],
-        "temperature": 0.001,
-        "smearing": {
-            "$symbol": "Smearing.Gaussian"
-        }
+        "temperature": 0.001
     },
     "basis_kwargs": {
-        "Ecut": 10
+        "Ecut": 20
     },
     "scf": {
         "$function": "self_consistent_field",
         "checkpointfile": "scfres.jld2",
         "$kwargs": {
-            "mixing": {
-                 "$symbol": "KerkerDosMixing"
-            },
             "is_converged": {
                  "$symbol": "ScfConvergenceEnergy",
                  "$args": 1.0e-6
@@ -51,12 +45,12 @@ builder.parameters = Parameters
 
 #set kpoints
 kpoints = orm.KpointsData()
-kpoints.set_kpoints_mesh([4, 2, 2],offset=[0.5,0.5,0.5])
+kpoints.set_kpoints_mesh([6, 6, 2],offset=[0,0,0])
 builder.kpoints = kpoints
 
 #set pseudos
-ppf = load_group("SSSP/1.1/PBE/efficiency")
-Pseudos = ppf.get_pseudos(structure=Si)
+ppf = load_group("PseudoDojo/0.4/PBE/SR/standard/upf")
+Pseudos = ppf.get_pseudos(structure=structure)
 builder.pseudos = Pseudos
 
 # Set the options
