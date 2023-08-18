@@ -4,7 +4,7 @@ from aiida.plugins import CalculationFactory
 DFTKCalculation = CalculationFactory('dftk')
 
 # Setup the code (assuming 'dftk@localhost' exists)
-code = orm.load_code('mpiDFTKtest@juliaMPI_local_direct')  # change the label to whatever you've set up
+code = orm.load_code('DFTK@local_slurm')  # change the label to whatever you've set up
 
 # Setup the builder
 builder = DFTKCalculation.get_builder()
@@ -39,6 +39,9 @@ Parameters = orm.Dict({
     "postscf": [
         {
             "$function": "compute_forces_cart"
+        },
+        {
+            "$function": "compute_stresses_cart"
         }
     ]
 })
@@ -46,7 +49,7 @@ builder.parameters = Parameters
 
 #set kpoints
 kpoints = orm.KpointsData()
-kpoints.set_kpoints_mesh([3, 3, 1],offset=[0.5,0.5,0.5])
+kpoints.set_kpoints_mesh([3, 3, 1])
 builder.kpoints = kpoints
 
 #set pseudos
@@ -57,8 +60,8 @@ builder.pseudos = Pseudos
 # Set the options
 builder.metadata.options.withmpi = True
 builder.metadata.options.resources = {
-    'num_machines': 2,
-    'num_mpiprocs_per_machine': 1,
+    'num_machines': 1,
+    'num_mpiprocs_per_machine': 2,
 }
 
 builder.code = code
