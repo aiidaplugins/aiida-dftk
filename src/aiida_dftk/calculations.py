@@ -19,6 +19,7 @@ class DftkCalculation(CalcJob):
     _DEFAULT_INPUT_EXTENSION = 'json'
     _DEFAULT_STDOUT_EXTENSION = 'txt'
     _DEFAULT_SCFRES_SUMMARY_NAME = 'scfres_summary.json'
+    _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart']
     _PSEUDO_SUBFOLDER = './pseudo/'
 
     @staticmethod
@@ -90,10 +91,19 @@ class DftkCalculation(CalcJob):
         '''
         spec.default_output_node = 'output_parameters'
 
-    @classmethod
+
+
     def validate_inputs(self):
         """validate input parameters"""
-        pass
+        parameters = self.inputs.parameters.get_dict()
+        # check postscf
+        if 'postscf' in parameters:
+            for postscf in parameters['postscf']:
+                if postscf['$function'] not in self._SUPPORTED_POSTSCF:
+                    raise exceptions.InputValidationError(
+                        f"Unsupported postscf function: {postscf['$function']}"
+                    )
+
 
     def validate_pseudos(self):
         """validate pseudopotentials
