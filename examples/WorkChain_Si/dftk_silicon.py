@@ -1,20 +1,17 @@
 from aiida import engine, orm
 from aiida.plugins import CalculationFactory
+from aiida_dftk.workflows import DftkBaseWorkChain
 
-DFTKCalculation = CalculationFactory('dftk')
 
 # Setup the code (assuming 'dftk@localhost' exists)
 code = orm.load_code('DFTK@local_direct')  # change the label to whatever you've set up
 
-# Setup the builder
-builder = DFTKCalculation.get_builder()
 #load silicon structure
-cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/Silicon/Si.cif")
+cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/WorkChain_Si/Si.cif")
 structure = cif.get_structure()
-builder.structure = structure
 
 #load parameters
-Parameters = orm.Dict({
+parameters = orm.Dict({
     "model_kwargs": {
         "xc": [
             ":gga_x_pbe",
@@ -22,7 +19,7 @@ Parameters = orm.Dict({
         ]
     },
     "basis_kwargs": {
-        "Ecut": 20
+        "Ecut": 6
     },
     "scf": {
         "$function": "self_consistent_field",
@@ -30,7 +27,7 @@ Parameters = orm.Dict({
         "$kwargs": {
             "is_converged": {
                  "$symbol": "ScfConvergenceEnergy",
-                 "$args": 1.0e-6
+                 "$args": 1.0e-2
             },
             "maxiter": 100
         }
@@ -44,27 +41,40 @@ Parameters = orm.Dict({
         }
     ]
 })
-builder.parameters = Parameters
 
 #set kpoints
 kpoints = orm.KpointsData()
-kpoints.set_kpoints_mesh([4, 4, 4])
-builder.kpoints = kpoints
+kpoints.set_kpoints_mesh([2, 2, 2])
 
 #set pseudos
 ppf = load_group("PseudoDojo/0.4/PBE/SR/standard/upf")
-Pseudos = ppf.get_pseudos(structure=structure)
-builder.pseudos = Pseudos
+pseudos = ppf.get_pseudos(structure=structure)
 
-# Set the options
-builder.metadata.options.withmpi = False
-builder.metadata.options.resources = {
-    'num_machines': 1,
-    'num_mpiprocs_per_machine': 1
-}
 
-builder.code = code
+#        'kpoints_distance': orm.Float(0.6),  # 1 / Angstrom
+base_parameters_dict = {
+        'kpoints': kpoints,
+        'dftk': {
+            'code': code,
+            'structure': structure,
+            'pseudos': pseudos,
+            'parameters': parameters,
+            'metadata': {
+                'options': {
+                    'withmpi': False,
+                    'resources': {
+                        'num_machines': 1,
+                        'num_mpiprocs_per_machine': 1,
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
 
 # Run the calculation
-result = engine.run(builder)
+result = engine.run(DftkBaseWorkChain, **base_parameters_dict)
 

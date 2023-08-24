@@ -18,7 +18,7 @@ class DftkCalculation(CalcJob):
     _DEFAULT_PREFIX = 'DFTK'
     _DEFAULT_INPUT_EXTENSION = 'json'
     _DEFAULT_STDOUT_EXTENSION = 'txt'
-    _DEFAULT_SCFRES_SUMMARY_NAME = 'scfres_summary.json'
+    _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart']
     _PSEUDO_SUBFOLDER = './pseudo/'
 
@@ -47,7 +47,7 @@ class DftkCalculation(CalcJob):
                    default=True)
 
         spec.input('structure', valid_type=orm.StructureData,
-                    help='structure')
+                   help='structure')
         spec.input_namespace('pseudos',
                              valid_type=UpfData,
                              help='The pseudopotentials.',
@@ -151,7 +151,7 @@ class DftkCalculation(CalcJob):
     def _generate_cmdline_params(self) -> ty.List[str]:
         # Define the command based on the input settings
         cmd_params = []
-        cmd_params.extend(['-e', 'using AiidaDFTK, MPIPreferences; MPIPreferences.use_system_binary(); AiidaDFTK.run()', self.metadata.options.input_filename])
+        cmd_params.extend(['-e', 'using AiidaDFTK; AiidaDFTK.run()', self.metadata.options.input_filename])
         return cmd_params
 
     def _generate_retrieve_list(self, parameters: orm.Dict) -> list:

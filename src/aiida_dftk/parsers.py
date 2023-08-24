@@ -10,7 +10,7 @@ import json
 
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
-    _DEFAULT_SCFRES_SUMMARY_NAME = 'scfres_summary.json'
+    _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     _DEFAULT_ENERGY_UNIT = 'hartree'
     _DEFAULT_FORCE_FUNCNAME = 'compute_forces_cart'
     _DEFAULT_FORCE_UNIT = 'hartree/bohr'
@@ -61,7 +61,7 @@ class DftkParser(Parser):
         """
 
         ###TODO: just a test, remove this after dump_scfres_to_json is implemented in DFTK
-        file_path = "/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/MoS2/scfres_test.json"
+        #file_path = "/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/MoS2/scfres_test.json"
         
         with open(file_path, 'r') as file:
             data = json.load(file)

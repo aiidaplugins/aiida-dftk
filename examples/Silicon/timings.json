@@ -1,30 +1,30 @@
 {
-    "total_time_ns": 79073445326,
-    "total_allocated_bytes": 18853804448,
+    "total_time_ns": 66860841732,
+    "total_allocated_bytes": 28232312397,
     "time_ns": 0,
     "n_calls": 0,
     "allocated_bytes": 0,
     "inner_timers": {
         "PlaneWaveBasis": {
-            "total_time_ns": 1177176465,
-            "total_allocated_bytes": 620513001,
-            "time_ns": 2484632937,
-            "n_calls": 2,
-            "allocated_bytes": 724534716,
+            "total_time_ns": 1749265487,
+            "total_allocated_bytes": 384253961,
+            "time_ns": 2510518120,
+            "n_calls": 1,
+            "allocated_bytes": 433643879,
             "inner_timers": {
                 "Instantiation Hartree": {
-                    "total_time_ns": 2098478,
-                    "total_allocated_bytes": 6432,
-                    "time_ns": 3259382,
-                    "n_calls": 2,
-                    "allocated_bytes": 8857360,
+                    "total_time_ns": 966899,
+                    "total_allocated_bytes": 3216,
+                    "time_ns": 1533428,
+                    "n_calls": 1,
+                    "allocated_bytes": 4429456,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 2098478,
-                            "n_calls": 2,
-                            "allocated_bytes": 6432,
+                            "time_ns": 966899,
+                            "n_calls": 1,
+                            "allocated_bytes": 3216,
                             "inner_timers": {
                             }
                         }
@@ -33,88 +33,88 @@
                 "build_kpoints": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 40161248,
-                    "n_calls": 2,
-                    "allocated_bytes": 50159225,
+                    "time_ns": 122066811,
+                    "n_calls": 1,
+                    "allocated_bytes": 33959017,
                     "inner_timers": {
                     }
                 },
                 "Instantiation AtomicNonlocal": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 562320698,
-                    "n_calls": 2,
-                    "allocated_bytes": 249422896,
+                    "time_ns": 844258606,
+                    "n_calls": 1,
+                    "allocated_bytes": 182227136,
                     "inner_timers": {
                     }
                 },
                 "Instantiation PspCorrection": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 9243483,
-                    "n_calls": 2,
-                    "allocated_bytes": 1036991,
+                    "time_ns": 8707217,
+                    "n_calls": 1,
+                    "allocated_bytes": 1036399,
                     "inner_timers": {
                     }
                 },
                 "Instantiation Kinetic": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 1237358,
-                    "n_calls": 2,
-                    "allocated_bytes": 3919888,
+                    "time_ns": 922696,
+                    "n_calls": 1,
+                    "allocated_bytes": 2612208,
                     "inner_timers": {
                     }
                 },
                 "Instantiation AtomicLocal": {
-                    "total_time_ns": 2403623,
-                    "total_allocated_bytes": 6432,
-                    "time_ns": 167153330,
-                    "n_calls": 2,
-                    "allocated_bytes": 55420444,
+                    "total_time_ns": 1160240,
+                    "total_allocated_bytes": 3216,
+                    "time_ns": 236563205,
+                    "n_calls": 1,
+                    "allocated_bytes": 30385388,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 2403623,
-                            "n_calls": 2,
-                            "allocated_bytes": 6432,
+                            "time_ns": 1160240,
+                            "n_calls": 1,
+                            "allocated_bytes": 3216,
                             "inner_timers": {
                             }
                         }
                     }
                 },
                 "Instantiation Ewald": {
-                    "total_time_ns": 161371442,
-                    "total_allocated_bytes": 155128336,
-                    "time_ns": 161389955,
-                    "n_calls": 2,
-                    "allocated_bytes": 155129344,
+                    "total_time_ns": 190539097,
+                    "total_allocated_bytes": 77575696,
+                    "time_ns": 190550546,
+                    "n_calls": 1,
+                    "allocated_bytes": 77576672,
                     "inner_timers": {
                         "precomp: Ewald": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 161371442,
-                            "n_calls": 2,
-                            "allocated_bytes": 155128336,
+                            "time_ns": 190539097,
+                            "n_calls": 1,
+                            "allocated_bytes": 77575696,
                             "inner_timers": {
                             }
                         }
                     }
                 },
                 "Instantiation Xc": {
-                    "total_time_ns": 2334243,
-                    "total_allocated_bytes": 6432,
-                    "time_ns": 232411011,
-                    "n_calls": 2,
-                    "allocated_bytes": 96566853,
+                    "total_time_ns": 1100463,
+                    "total_allocated_bytes": 3216,
+                    "time_ns": 344662978,
+                    "n_calls": 1,
+                    "allocated_bytes": 52027685,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 2334243,
-                            "n_calls": 2,
-                            "allocated_bytes": 6432,
+                            "time_ns": 1100463,
+                            "n_calls": 1,
+                            "allocated_bytes": 3216,
                             "inner_timers": {
                             }
                         }
@@ -125,23 +125,23 @@
         "spglib_get_symmetry": {
             "total_time_ns": 0,
             "total_allocated_bytes": 0,
-            "time_ns": 29329365,
+            "time_ns": 10720812,
             "n_calls": 1,
             "allocated_bytes": 289440,
             "inner_timers": {
             }
         },
         "compute_forces": {
-            "total_time_ns": 4219827927,
-            "total_allocated_bytes": 1022153781,
-            "time_ns": 5346918198,
+            "total_time_ns": 2350462762,
+            "total_allocated_bytes": 1823931598,
+            "time_ns": 3328506378,
             "n_calls": 1,
-            "allocated_bytes": 1191389998,
+            "allocated_bytes": 1993352445,
             "inner_timers": {
                 "forces: xc": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 123026531,
+                    "time_ns": 124513408,
                     "n_calls": 1,
                     "allocated_bytes": 143666688,
                     "inner_timers": {
@@ -150,104 +150,104 @@
                 "forces: nonlocal": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 2752434770,
+                    "time_ns": 1001298348,
                     "n_calls": 1,
-                    "allocated_bytes": 835658833,
+                    "allocated_bytes": 1637329444,
                     "inner_timers": {
                     }
                 },
                 "forces: local": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 1344366626,
+                    "time_ns": 1224651006,
                     "n_calls": 1,
-                    "allocated_bytes": 42828260,
+                    "allocated_bytes": 42935466,
                     "inner_timers": {
                     }
                 }
             }
         },
         "self_consistent_field": {
-            "total_time_ns": 29501739754,
-            "total_allocated_bytes": 2707301725,
-            "time_ns": 33899644300,
+            "total_time_ns": 14323887205,
+            "total_allocated_bytes": 3940779205,
+            "time_ns": 17513564023,
             "n_calls": 1,
-            "allocated_bytes": 3197248569,
+            "allocated_bytes": 4452566320,
             "inner_timers": {
                 "χ0Mixing": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 43707971,
+                    "time_ns": 46740751,
                     "n_calls": 5,
-                    "allocated_bytes": 1445284,
+                    "allocated_bytes": 1445476,
                     "inner_timers": {
                     }
                 },
                 "ortho_qr": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 164723039,
-                    "n_calls": 5,
-                    "allocated_bytes": 14264224,
+                    "time_ns": 43012072,
+                    "n_calls": 10,
+                    "allocated_bytes": 28499776,
                     "inner_timers": {
                     }
                 },
                 "energy_hamiltonian": {
-                    "total_time_ns": 3861371887,
-                    "total_allocated_bytes": 1204444141,
-                    "time_ns": 3920084959,
+                    "total_time_ns": 2748461677,
+                    "total_allocated_bytes": 1213782733,
+                    "time_ns": 3265058295,
                     "n_calls": 11,
-                    "allocated_bytes": 1399659233,
+                    "allocated_bytes": 1604037041,
                     "inner_timers": {
                         "ene_ops": {
-                            "total_time_ns": 3577647351,
-                            "total_allocated_bytes": 1185033076,
-                            "time_ns": 3861371887,
+                            "total_time_ns": 2481027994,
+                            "total_allocated_bytes": 1194205044,
+                            "time_ns": 2748461677,
                             "n_calls": 11,
-                            "allocated_bytes": 1204444141,
+                            "allocated_bytes": 1213782733,
                             "inner_timers": {
                                 "ene_ops: local": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 3276373,
+                                    "time_ns": 10190919,
                                     "n_calls": 11,
-                                    "allocated_bytes": 19515056,
+                                    "allocated_bytes": 19560464,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: hartree": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 103854354,
+                                    "time_ns": 120689153,
                                     "n_calls": 11,
-                                    "allocated_bytes": 97513574,
+                                    "allocated_bytes": 97558486,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: xc": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 2116403780,
+                                    "time_ns": 2060001302,
                                     "n_calls": 11,
-                                    "allocated_bytes": 1058654994,
+                                    "allocated_bytes": 1058637954,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: nonlocal": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 1295534855,
+                                    "time_ns": 268747203,
                                     "n_calls": 11,
-                                    "allocated_bytes": 8967638,
+                                    "allocated_bytes": 17777238,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: kinetic": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 58577989,
+                                    "time_ns": 21399417,
                                     "n_calls": 11,
-                                    "allocated_bytes": 381814,
+                                    "allocated_bytes": 670902,
                                     "inner_timers": {
                                     }
                                 }
@@ -256,34 +256,34 @@
                     }
                 },
                 "LOBPCG": {
-                    "total_time_ns": 20606470531,
-                    "total_allocated_bytes": 565990984,
-                    "time_ns": 21959576072,
-                    "n_calls": 25,
-                    "allocated_bytes": 1227104488,
+                    "total_time_ns": 6818716946,
+                    "total_allocated_bytes": 1012344592,
+                    "time_ns": 7621345034,
+                    "n_calls": 50,
+                    "allocated_bytes": 2241960896,
                     "inner_timers": {
                         "Update residuals": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 136347494,
-                            "n_calls": 129,
-                            "allocated_bytes": 137335696,
+                            "time_ns": 141808042,
+                            "n_calls": 233,
+                            "allocated_bytes": 251756688,
                             "inner_timers": {
                             }
                         },
                         "ortho! X vs Y": {
-                            "total_time_ns": 1136585180,
-                            "total_allocated_bytes": 9866240,
-                            "time_ns": 2918864386,
-                            "n_calls": 183,
-                            "allocated_bytes": 138518432,
+                            "total_time_ns": 210603335,
+                            "total_allocated_bytes": 17452824,
+                            "time_ns": 672777569,
+                            "n_calls": 316,
+                            "allocated_bytes": 232771288,
                             "inner_timers": {
                                 "ortho!": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 1136585180,
-                                    "n_calls": 357,
-                                    "allocated_bytes": 9866240,
+                                    "time_ns": 210603335,
+                                    "n_calls": 608,
+                                    "allocated_bytes": 17452824,
                                     "inner_timers": {
                                     }
                                 }
@@ -292,61 +292,61 @@
                         "preconditioning": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 35481342,
-                            "n_calls": 129,
-                            "allocated_bytes": 1254224,
+                            "time_ns": 67881197,
+                            "n_calls": 233,
+                            "allocated_bytes": 2264096,
                             "inner_timers": {
                             }
                         },
                         "ortho!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 466316222,
-                            "n_calls": 25,
-                            "allocated_bytes": 813800,
+                            "time_ns": 33723347,
+                            "n_calls": 50,
+                            "allocated_bytes": 1627600,
                             "inner_timers": {
                             }
                         },
                         "DftHamiltonian multiplication": {
-                            "total_time_ns": 15747248882,
-                            "total_allocated_bytes": 153411648,
-                            "time_ns": 15854545505,
-                            "n_calls": 129,
-                            "allocated_bytes": 270992992,
+                            "total_time_ns": 5352565592,
+                            "total_allocated_bytes": 281279232,
+                            "time_ns": 5501009782,
+                            "n_calls": 233,
+                            "allocated_bytes": 493745424,
                             "inner_timers": {
                                 "local+kinetic": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 9405228160,
-                                    "n_calls": 1835,
-                                    "allocated_bytes": 1510736,
+                                    "time_ns": 4465953759,
+                                    "n_calls": 3369,
+                                    "allocated_bytes": 2737936,
                                     "inner_timers": {
                                     }
                                 },
                                 "nonlocal": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 6342020722,
-                                    "n_calls": 129,
-                                    "allocated_bytes": 151900912,
+                                    "time_ns": 886611833,
+                                    "n_calls": 233,
+                                    "allocated_bytes": 278541296,
                                     "inner_timers": {
                                     }
                                 }
                             }
                         },
                         "rayleigh_ritz": {
-                            "total_time_ns": 181152330,
-                            "total_allocated_bytes": 2028336,
-                            "time_ns": 1194915582,
-                            "n_calls": 104,
-                            "allocated_bytes": 17075840,
+                            "total_time_ns": 8217700,
+                            "total_allocated_bytes": 3674824,
+                            "time_ns": 401517009,
+                            "n_calls": 183,
+                            "allocated_bytes": 30179496,
                             "inner_timers": {
                                 "ortho!": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 181152330,
-                                    "n_calls": 104,
-                                    "allocated_bytes": 2028336,
+                                    "time_ns": 8217700,
+                                    "n_calls": 183,
+                                    "allocated_bytes": 3674824,
                                     "inner_timers": {
                                     }
                                 }
@@ -355,16 +355,16 @@
                     }
                 },
                 "compute_density": {
-                    "total_time_ns": 2839359552,
+                    "total_time_ns": 2796448966,
                     "total_allocated_bytes": 51497904,
-                    "time_ns": 3413647713,
+                    "time_ns": 3347731053,
                     "n_calls": 5,
-                    "allocated_bytes": 64828496,
+                    "allocated_bytes": 64836016,
                     "inner_timers": {
                         "symmetrize_ρ": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 2839359552,
+                            "time_ns": 2796448966,
                             "n_calls": 5,
                             "allocated_bytes": 51497904,
                             "inner_timers": {
@@ -375,41 +375,41 @@
             }
         },
         "compute_stresses_cart": {
-            "total_time_ns": 33599889725,
-            "total_allocated_bytes": 13598515821,
-            "time_ns": 37311467449,
+            "total_time_ns": 40095029817,
+            "total_allocated_bytes": 21210601670,
+            "time_ns": 43496612145,
             "n_calls": 1,
-            "allocated_bytes": 13740338509,
+            "allocated_bytes": 21352457097,
             "inner_timers": {
                 "compute_density": {
-                    "total_time_ns": 1926684758,
-                    "total_allocated_bytes": 236248780,
-                    "time_ns": 6620639427,
+                    "total_time_ns": 1596524928,
+                    "total_allocated_bytes": 236249356,
+                    "time_ns": 8529182526,
                     "n_calls": 1,
-                    "allocated_bytes": 7157814061,
+                    "allocated_bytes": 13881976454,
                     "inner_timers": {
                         "symmetrize_ρ": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 1926684758,
+                            "time_ns": 1596524928,
                             "n_calls": 1,
-                            "allocated_bytes": 236248780,
+                            "allocated_bytes": 236249356,
                             "inner_timers": {
                             }
                         }
                     }
                 },
                 "Instantiation Hartree": {
-                    "total_time_ns": 1203429,
+                    "total_time_ns": 1007380,
                     "total_allocated_bytes": 3216,
-                    "time_ns": 445363047,
+                    "time_ns": 595966599,
                     "n_calls": 1,
-                    "allocated_bytes": 89779637,
+                    "allocated_bytes": 89777333,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 1203429,
+                            "time_ns": 1007380,
                             "n_calls": 1,
                             "allocated_bytes": 3216,
                             "inner_timers": {
@@ -420,95 +420,95 @@
                 "build_kpoints": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 11196066,
+                    "time_ns": 20117372,
                     "n_calls": 1,
-                    "allocated_bytes": 16201328,
+                    "allocated_bytes": 32402736,
                     "inner_timers": {
                     }
                 },
                 "Instantiation AtomicNonlocal": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 2598386327,
+                    "time_ns": 6515119779,
                     "n_calls": 1,
-                    "allocated_bytes": 766752223,
+                    "allocated_bytes": 1443374573,
                     "inner_timers": {
                     }
                 },
                 "Instantiation PspCorrection": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 83394985,
+                    "time_ns": 93241383,
                     "n_calls": 1,
-                    "allocated_bytes": 10281969,
+                    "allocated_bytes": 10270557,
                     "inner_timers": {
                     }
                 },
                 "Instantiation Kinetic": {
                     "total_time_ns": 0,
                     "total_allocated_bytes": 0,
-                    "time_ns": 275311100,
+                    "time_ns": 327356258,
                     "n_calls": 1,
-                    "allocated_bytes": 34905324,
+                    "allocated_bytes": 48031708,
                     "inner_timers": {
                     }
                 },
                 "energy_hamiltonian": {
-                    "total_time_ns": 13764798225,
-                    "total_allocated_bytes": 2971928075,
-                    "time_ns": 15458165436,
+                    "total_time_ns": 13460925326,
+                    "total_allocated_bytes": 2976433272,
+                    "time_ns": 15114558052,
                     "n_calls": 1,
-                    "allocated_bytes": 3262806792,
+                    "allocated_bytes": 3444809701,
                     "inner_timers": {
                         "ene_ops": {
-                            "total_time_ns": 10770972482,
-                            "total_allocated_bytes": 2605558336,
-                            "time_ns": 13764798225,
+                            "total_time_ns": 10694947591,
+                            "total_allocated_bytes": 2611023325,
+                            "time_ns": 13460925326,
                             "n_calls": 1,
-                            "allocated_bytes": 2971928075,
+                            "allocated_bytes": 2976433272,
                             "inner_timers": {
                                 "ene_ops: local": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 2802781,
+                                    "time_ns": 2624930,
                                     "n_calls": 1,
-                                    "allocated_bytes": 17717584,
+                                    "allocated_bytes": 17739952,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: hartree": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 324529436,
+                                    "time_ns": 284229329,
                                     "n_calls": 1,
-                                    "allocated_bytes": 206202030,
+                                    "allocated_bytes": 206223902,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: xc": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 7918226778,
+                                    "time_ns": 6957137186,
                                     "n_calls": 1,
-                                    "allocated_bytes": 2118843133,
+                                    "allocated_bytes": 2118504813,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: nonlocal": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 2374346459,
+                                    "time_ns": 3306617066,
                                     "n_calls": 1,
-                                    "allocated_bytes": 243305140,
+                                    "allocated_bytes": 248937860,
                                     "inner_timers": {
                                     }
                                 },
                                 "ene_ops: kinetic": {
                                     "total_time_ns": 0,
                                     "total_allocated_bytes": 0,
-                                    "time_ns": 151067028,
+                                    "time_ns": 144339080,
                                     "n_calls": 1,
-                                    "allocated_bytes": 19490449,
+                                    "allocated_bytes": 19616798,
                                     "inner_timers": {
                                     }
                                 }
@@ -517,16 +517,16 @@
                     }
                 },
                 "Instantiation AtomicLocal": {
-                    "total_time_ns": 1218220,
+                    "total_time_ns": 1150463,
                     "total_allocated_bytes": 3216,
-                    "time_ns": 2391753557,
+                    "time_ns": 2240401809,
                     "n_calls": 1,
-                    "allocated_bytes": 1156445325,
+                    "allocated_bytes": 1156422344,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 1218220,
+                            "time_ns": 1150463,
                             "n_calls": 1,
                             "allocated_bytes": 3216,
                             "inner_timers": {
@@ -535,34 +535,34 @@
                     }
                 },
                 "Instantiation Ewald": {
-                    "total_time_ns": 1790719307,
-                    "total_allocated_bytes": 631205045,
-                    "time_ns": 2133823379,
+                    "total_time_ns": 3011819478,
+                    "total_allocated_bytes": 631006071,
+                    "time_ns": 3327256822,
                     "n_calls": 1,
-                    "allocated_bytes": 724034301,
+                    "allocated_bytes": 723883696,
                     "inner_timers": {
                         "precomp: Ewald": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 1790719307,
+                            "time_ns": 3011819478,
                             "n_calls": 1,
-                            "allocated_bytes": 631205045,
+                            "allocated_bytes": 631006071,
                             "inner_timers": {
                             }
                         }
                     }
                 },
                 "Instantiation Xc": {
-                    "total_time_ns": 1158415,
+                    "total_time_ns": 1184126,
                     "total_allocated_bytes": 3216,
-                    "time_ns": 3581856401,
+                    "time_ns": 3331829217,
                     "n_calls": 1,
-                    "allocated_bytes": 379494861,
+                    "allocated_bytes": 379652568,
                     "inner_timers": {
                         "enforce_real!": {
                             "total_time_ns": 0,
                             "total_allocated_bytes": 0,
-                            "time_ns": 1158415,
+                            "time_ns": 1184126,
                             "n_calls": 1,
                             "allocated_bytes": 3216,
                             "inner_timers": {
@@ -575,7 +575,7 @@
         "enforce_real!": {
             "total_time_ns": 0,
             "total_allocated_bytes": 0,
-            "time_ns": 1453077,
+            "time_ns": 920254,
             "n_calls": 1,
             "allocated_bytes": 3216,
             "inner_timers": {
