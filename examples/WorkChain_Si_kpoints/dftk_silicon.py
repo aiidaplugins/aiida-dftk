@@ -7,7 +7,7 @@ from aiida_dftk.workflows import DftkBaseWorkChain
 code = orm.load_code('DFTK@local_direct')  # change the label to whatever you've set up
 
 #load silicon structure
-cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/WorkChain_Si/Si.cif")
+cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/WorkChain_Si_kpoints/Si.cif")
 structure = cif.get_structure()
 
 #load parameters
@@ -44,6 +44,7 @@ parameters = orm.Dict({
 
 #set kpoints
 kpoints = orm.KpointsData()
+kpoints.set_cell_from_structure(structure) #must be set for inspect_process to work
 kpoints.set_kpoints_mesh([2, 2, 2])
 
 #set pseudos

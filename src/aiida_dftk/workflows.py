@@ -92,6 +92,11 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         #     if key in self.inputs:
         #         return self.exit_codes.ERROR_INVALID_INPUT_KPOINTS # pylint: disable=no-member
 
+        # if both specified or both not specified
+        if ('kpoints' in self.inputs) == ('kpoints_distance' in self.inputs):  # Both are present or both are absent
+            return self.exit_codes['ERROR_INVALID_INPUT_KPOINTS']
+        
+
         try:
             kpoints = self.inputs.kpoints
         except AttributeError:
@@ -156,8 +161,10 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         self.report('{}<{}> failed with exit status {}: {}'.format(*arguments))
         self.report(f'Action taken: {action}')
 
-    @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
-    def get_process_handlers_by_priority(self, calculation) -> List[Tuple[int, FunctionType]]:
+    @process_handler(priority=500, exit_codes=[
+        DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED
+        ])
+    def handle_scf_convergence_not_reached(self, calculation):
         return None
 
     # Just as a blueprint, delete after ^ is implemented
