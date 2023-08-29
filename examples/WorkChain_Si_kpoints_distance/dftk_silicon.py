@@ -1,6 +1,6 @@
 from aiida import engine, orm
 from aiida.plugins import CalculationFactory
-from aiida_dftk.workflows import DftkBaseWorkChain
+from aiida_dftk.workflows.base import DftkBaseWorkChain
 
 
 # Setup the code (assuming 'dftk@localhost' exists)

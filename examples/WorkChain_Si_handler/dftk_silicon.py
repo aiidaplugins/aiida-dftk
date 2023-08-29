@@ -27,9 +27,9 @@ parameters = orm.Dict({
         "$kwargs": {
             "is_converged": {
                  "$symbol": "ScfConvergenceEnergy",
-                 "$args": 1.0e-2
+                 "$args": 1.0e-10
             },
-            "maxiter": 100
+            "maxiter": 1 #for testing the scf_convergence_not_reached exit code
         }
     },
     "postscf": [
