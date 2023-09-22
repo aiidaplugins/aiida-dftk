@@ -1,16 +1,17 @@
 from aiida import engine, orm
 from aiida.plugins import CalculationFactory
-from aiida_dftk.workflows.base import DftkBaseWorkChain
 
+DFTKCalculation = CalculationFactory('dftk')
 
 # Setup the code (assuming 'dftk@localhost' exists)
-code = orm.load_code('DFTK@local_direct')  # change the label to whatever you've set up
+# change the label to whatever you've set up
+code = orm.load_code('DFTK@local_direct')
 
-#load silicon structure
-cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/WorkChain_Si_kpoints/Si.cif")
+# load silicon structure
+cif = orm.CifData(file="/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/Silicon_primitive/Si.cif")
 structure = cif.get_structure()
 
-#load parameters
+# load parameters
 parameters = orm.Dict({
     "model_kwargs": {
         "xc": [
@@ -46,40 +47,34 @@ parameters = orm.Dict({
     ]
 })
 
-#set kpoints
+# set kpoints
 kpoints = orm.KpointsData()
-kpoints.set_cell_from_structure(structure) #must be set for inspect_process to work
+# must be set for inspect_process to work
+kpoints.set_cell_from_structure(structure)
 kpoints.set_kpoints_mesh([2, 2, 2])
 
-#set pseudos
+# set pseudos
 ppf = load_group("PseudoDojo/0.4/PBE/SR/standard/upf")
 pseudos = ppf.get_pseudos(structure=structure)
 
 
-#        'kpoints_distance': orm.Float(0.6),  # 1 / Angstrom
-base_parameters_dict = {
-        'kpoints': kpoints,
-        'dftk': {
-            'code': code,
-            'structure': structure,
-            'pseudos': pseudos,
-            'parameters': parameters,
-            'metadata': {
-                'options': {
-                    'withmpi': False,
-                    'resources': {
-                        'num_machines': 1,
-                        'num_mpiprocs_per_machine': 1,
-                    }
-                }
+parameters_dict = {
+    'code': code,
+    'structure': structure,
+    'pseudos': pseudos,
+    'kpoints': kpoints,
+    'parameters': parameters,
+    'metadata': {
+        'options': {
+            'withmpi': False,
+            'resources': {
+                'num_machines': 1,
+                'num_mpiprocs_per_machine': 1,
             }
         }
     }
-
-
-
+}
 
 
 # Run the calculation
-result = engine.run(DftkBaseWorkChain, **base_parameters_dict)
-
+result = engine.run(DFTKCalculation, **parameters_dict)

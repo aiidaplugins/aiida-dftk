@@ -81,22 +81,22 @@ class DftkCalculation(CalcJob):
                     help='forces array')
         spec.output("output_stresses", valid_type=orm.ArrayData, required=False,
                     help='stresses array')
-        '''
-        spec.output('pseudos', valid_type=orm.Dict, required=False,
-            help='output pseudopotentials')
-        spec.output('output_trajectory', valid_type=orm.TrajectoryData, required=False,
-            help='trajectory data from structure optimization')
-        spec.output('output_bands', valid_type=orm.BandsData, required=False,
-            help='eigenvalues array')
-        '''
+        
+        # TODO: after bands & DOS implementation in DFTK
+        # spec.output('output_bands', valid_type=orm.BandsData, required=False,
+        #     help='eigenvalues array')
+        # spec.output('output_dos')
+        
         spec.default_output_node = 'output_parameters'
 
 
 
     def validate_inputs(self):
-        """validate input parameters"""
+        """validate input parameters
+
+        check if postscf supported
+        """
         parameters = self.inputs.parameters.get_dict()
-        # check postscf
         if 'postscf' in parameters:
             for postscf in parameters['postscf']:
                 if postscf['$function'] not in self._SUPPORTED_POSTSCF:
@@ -121,7 +121,11 @@ class DftkCalculation(CalcJob):
 
 
     def validate_kpoints(self):
-        """validate kpoints"""
+        """validate kpoints
+        
+        check if kpoints are defined in a mesh grid 
+        a list of kpoints will be supported after bands implementation in DFTK
+        """
         try:
             self.inputs.kpoints.get_kpoints_mesh()
         except AttributeError:
@@ -131,6 +135,17 @@ class DftkCalculation(CalcJob):
 
 
     def _generate_inputdata(self, parameters: orm.Dict, structure: orm.StructureData, pseudos: dict, kpoints: orm.KpointsData) -> ty.Tuple[dict, list]:
+        """
+        generate the input dict(json) for DFTK
+
+        :param parameters: a dict defines the calculation parameters for DFTK
+        :param structre: a StructureDate define the crystal
+        :param pseudos: a dict contains the pseudos
+        :param kpoints: a KpointData
+        :return: dict for the DFTK json input
+        :retunr: list of a pseudos needed to be copied
+        """
+        
         local_copy_pseudo_list=[]
 
         data = {"periodic_system":{},"model_kwargs":{},"basis_kwargs":{},"scf":{},"postscf":[]}

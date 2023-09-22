@@ -29,6 +29,8 @@ class DftkParser(Parser):
         with TemporaryDirectory() as dirpath:
             retrieved.copy_tree(dirpath)
 
+            #catch exceptions from SCF, forces, stresses
+            # TODO: handle exceptions for future supported postscf (bands, dos)
             if self._DEFAULT_SCFRES_SUMMARY_NAME in retrieve_list:
                 file_path = path.join(dirpath, self._DEFAULT_SCFRES_SUMMARY_NAME)
                 exit_code = self._parse_output_parameters(file_path)
@@ -60,13 +62,11 @@ class DftkParser(Parser):
         :return: Dictionary with results
         """
 
-        ###TODO: just a test, remove this after dump_scfres_to_json is implemented in DFTK
-        #file_path = "/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/MoS2/scfres_test.json"
-        
         with open(file_path, 'r') as file:
             data = json.load(file)
 
         # Ignore the 'occupation' and 'eigenvalues' keys
+        # TODO: add back for bands after implementation in DFTK
         data.pop('occupation', None)
         data.pop('eigenvalues', None)
 
@@ -103,6 +103,8 @@ class DftkParser(Parser):
         force_array=ArrayData()
         force_array.set_array('output_forces',force_dict['results'])
         self.out('output_forces',force_array)
+
+        # TODO!!!: add a check for the forces array agrees with number of atoms
 
 
     def _parse_output_stresses(self, file_path):

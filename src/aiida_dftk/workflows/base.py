@@ -88,9 +88,6 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         the case of the latter, the `KpointsData` will be constructed for the input `StructureData` using the
         `create_kpoints_from_distance` calculation function.
         """
-        # for key in ['kpoints', 'kpoints_distance']:
-        #     if key in self.inputs:
-        #         return self.exit_codes.ERROR_INVALID_INPUT_KPOINTS # pylint: disable=no-member
 
         # if both specified or both not specified
         if ('kpoints' in self.inputs) == ('kpoints_distance' in self.inputs):  # Both are present or both are absent
@@ -137,7 +134,6 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             return self.exit_codes.ERROR_INVALID_INPUT_RESOURCES_UNDERSPECIFIED  # pylint: disable=no-member
         
 
-
     def prepare_process(self):
         """Prepare the inputs for the next calculation.
 
@@ -146,6 +142,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         `restart_mode` is set to `from_scratch`.
         """
         
+        # AiidaDFTK will automatically check the existance of a checkpoint(scfres.jld2) and restart from it
         if self.ctx.restart_calc:
             self.ctx.inputs.parent_folder = self.ctx.restart_calc.outputs.remote_folder
 
@@ -161,9 +158,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         self.report('{}<{}> failed with exit status {}: {}'.format(*arguments))
         self.report(f'Action taken: {action}')
 
-    @process_handler(priority=500, exit_codes=[
-        DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED
-        ])
+    @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
     def handle_scf_convergence_not_reached(self, calculation):
         return None
 
