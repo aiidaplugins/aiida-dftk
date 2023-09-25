@@ -12,7 +12,7 @@ There are four documentation files available to guide you through the setup and 
 
 1. [**Set-up:**](docs/source/1%20Set-up.md) Learn how to set up the AiiDA-DFTK plugin. 
 2. [**First Calculation:**](docs/source/2%20First%20Calculation.md) Discover how to run a DFTK calculation using AiiDA.
-3. [**First Workflow:**](docs/source/3%20First%20Wrokchain.md) Understand how to run a DFTK calculation using AiiDA's DFTKbaseWorkchain.
+3. [**First Workchain:**](docs/source/3%20First%20Wrokchain.md) Understand how to run a DFTK calculation using AiiDA's DFTKbaseWorkchain.
 4. [**First Common Workflow:**](docs/source/4%20First%20Common%20Workflow.md) Explore how to run a DFTK calculation using AiiDA's common workflow.
 
 All documentation files are located in the [`aiida-dftk/docs/source/`](docs/source/) directory of the repository.
