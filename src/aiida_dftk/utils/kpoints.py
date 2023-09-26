@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 """k-point utility functions."""
-import numpy as np
-
 from aiida import orm
 from aiida.engine import calcfunction
+import numpy as np
 
 __all__ = ('create_kpoints_from_distance',)
 

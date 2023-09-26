@@ -18,7 +18,7 @@ Before proceeding, make sure you've completed the [development environment setup
 
 ## Step 1: Setting Up the Structure
 
-The structure of silicon will be read from a CIF file. 
+The structure of silicon will be read from a CIF file.
 
 ```python
 from aiida import orm
@@ -53,7 +53,7 @@ pseudos = ppf.get_pseudos(structure=structure)
 
 ## Step 4: K-points in base_parameters_dict
 
-In the `DftkBaseWorkChain`, k-points can be specified directly in the `base_parameters_dict` using either the `kpoints` or `kpoints_distance` keys. 
+In the `DftkBaseWorkChain`, k-points can be specified directly in the `base_parameters_dict` using either the `kpoints` or `kpoints_distance` keys.
 
 To specify a k-point mesh:
 
@@ -152,5 +152,3 @@ verdi node graph generate [PK of your process]
 ```
 
 The graph should have 7 data nodes (`InstalledCode`, `UpfData`, `StructureData`, `KpointsData`, `Input_parameters`, `max_iterations`, `clean_directory`) as inputs to 2 process nodes and 5 output data nodes (`RemoteData`, `RetrievedFolder`, `Output_parameters`, `Output_forces`, `Output_stresses`).
-
-

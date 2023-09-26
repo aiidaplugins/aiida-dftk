@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """Base DFTK WorkChain implementation."""
-from types import FunctionType
-from typing import List, Tuple
 from aiida import orm
-from aiida.common import AttributeDict, exceptions
-from aiida.engine import (BaseRestartWorkChain, ProcessHandlerReport, process_handler, while_)
+from aiida.common import AttributeDict
+from aiida.engine import BaseRestartWorkChain, process_handler, while_
 from aiida.plugins import CalculationFactory
-from aiida_dftk.utils import (create_kpoints_from_distance, validate_and_prepare_pseudos_inputs)
+
+from aiida_dftk.utils import create_kpoints_from_distance, validate_and_prepare_pseudos_inputs
 
 DftkCalculation = CalculationFactory('dftk')
 
@@ -92,7 +91,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         # if both specified or both not specified
         if ('kpoints' in self.inputs) == ('kpoints_distance' in self.inputs):  # Both are present or both are absent
             return self.exit_codes['ERROR_INVALID_INPUT_KPOINTS']
-        
+
 
         try:
             kpoints = self.inputs.kpoints
@@ -123,7 +122,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
 
     def validate_resources(self):
         """Validate the inputs related to the resources.
-        
+
         `metadata.options` should at least contain the options `resources` and `max_wallclock_seconds`,
         where `resources` should define the `num_machines`.
         """
@@ -132,7 +131,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
 
         if num_machines is None or max_wallclock_seconds is None:
             return self.exit_codes.ERROR_INVALID_INPUT_RESOURCES_UNDERSPECIFIED  # pylint: disable=no-member
-        
+
 
     def prepare_process(self):
         """Prepare the inputs for the next calculation.
@@ -141,7 +140,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         for the next calculation and the `restart_mode` is set to `restart`. Otherwise, no `parent_folder` is used and
         `restart_mode` is set to `from_scratch`.
         """
-        
+
         # AiidaDFTK will automatically check the existance of a checkpoint(scfres.jld2) and restart from it
         if self.ctx.restart_calc:
             self.ctx.inputs.parent_folder = self.ctx.restart_calc.outputs.remote_folder
@@ -159,7 +158,8 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         self.report(f'Action taken: {action}')
 
     @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
-    def handle_scf_convergence_not_reached(self, calculation):
+    def handle_scf_convergence_not_reached(self, _):
+        """Handle unconverged SCF calculations."""
         return None
 
     # Just as a blueprint, delete after ^ is implemented

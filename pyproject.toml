@@ -6,7 +6,7 @@ build-backend = 'flit_core.buildapi'
 name = 'aiida-dftk'
 dynamic = ['version']
 description = 'AiiDA plugin for DFTK'
-authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}]
+authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}, {name = 'Yihan Wu', email = 'yihan.wu@epfl.ch'}]
 readme = 'README.md'
 license = {file = 'LICENSE'}
 classifiers = [
@@ -75,6 +75,7 @@ name = 'aiida_dftk'
 exclude = [
     'docs/',
     'tests/',
+    'examples/'
 ]
 
 [tool.flynt]
@@ -94,9 +95,12 @@ ignore = [
     'D203',
     'D213'
 ]
+match = "^((?!examples)(?!test).)*$"
+
 
 [tool.pylint.master]
 load-plugins = ['pylint_aiida']
+ignore-paths = '^examples/.*$'
 
 [tool.pylint.format]
 max-line-length = 120
@@ -106,7 +110,6 @@ generated-members = 'self.exit_codes.*'
 
 [tool.pylint.messages_control]
 disable = [
-    'bad-continuation',
     'duplicate-code',
     'locally-disabled',
     'logging-format-interpolation',

@@ -18,7 +18,7 @@ Before proceeding, make sure you've completed the [development environment setup
 
 ## Step 1: Setting Up the Structure
 
-The structure of silicon will be read from a CIF file. 
+The structure of silicon will be read from a CIF file.
 
 ```python
 from aiida import orm
@@ -103,7 +103,7 @@ parameters = orm.Dict({
 ### Explanation of Parameters
 
 - `model_kwargs`: Keywords arguments for setting up the DFT model. It includes the exchange-correlation functional (`xc`) (any functionals supported by [Libxc](https://www.tddft.org/programs/libxc/functionals/)), electronic temperature (`temperature`), and the type of electronic smearing (`smearing`).
-  
+
 - `basis_kwargs`: Contains parameters for the plane-wave basis set. Here, `Ecut` specifies the plane-wave cutoff energy in Hartree.
 
 - `scf`: Parameters related to the self-consistent field (SCF) calculations. It includes the function to perform SCF (`$function`), a file to save the SCF results (`checkpointfile`), and additional arguments like convergence criteria (`is_converged`) and maximum iterations (`maxiter`).

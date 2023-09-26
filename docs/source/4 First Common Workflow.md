@@ -46,7 +46,7 @@ fast:
             parameters:
                 model_kwargs:
                     xc: [":gga_x_pbe", ":gga_c_pbe"]
-                    smearing: 
+                    smearing:
                         $symbol: "Smearing.FermiDirac"
                     temperature: 0.00225 # Ha
                 scf:
@@ -114,5 +114,3 @@ result = engine.run(builder)
 ```
 
 Here, `protocol='fastest'` specifies the protocol to use, and `electronic_type=ElectronicType.METAL` sets the electronic type.
-
-
