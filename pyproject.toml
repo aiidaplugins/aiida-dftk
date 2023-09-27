@@ -17,11 +17,12 @@ classifiers = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11'
 ]
 keywords = ['aiida', 'workflows']
 requires-python = '>=3.8'
 dependencies = [
-    'aiida_core[atomic_tools]~=2.0',
+    'aiida_core[atomic_tools]>=2.0',
     'click~=8.0',
     'importlib_resources',
     'jsonschema',
@@ -30,8 +31,8 @@ dependencies = [
 ]
 
 [project.urls]
-Home = 'https://github.com/azadoks/aiida-dftk'
-Source = 'https://github.com/azadoks/aiida-dftk'
+Home = 'https://github.com/aiidaplugins/aiida-dftk'
+Source = 'https://github.com/aiidaplugins/aiida-dftk'
 Documentation = 'https://aiida-dftk.readthedocs.io'
 
 [project.optional-dependencies]
@@ -120,6 +121,7 @@ disable = [
     'too-many-ancestors',
     'too-many-branches',
     'too-many-locals',
+    'fixme'
 ]
 
 [tool.pylint.basic]
@@ -128,6 +130,8 @@ good-names = [
     'j',
     'k',
     'DftkCalculation',
+    'StructureData',
+    'UpfData'
 ]
 
 [tool.pytest.ini_options]
