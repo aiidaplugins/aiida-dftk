@@ -6,10 +6,10 @@ DFTKCalculation = CalculationFactory('dftk')
 
 # Setup the code (assuming 'dftk@localhost' exists)
 # change the label to whatever you've set up
-code = orm.load_code('dftk@jed_on_scitas')
+code = orm.load_code('DFTKdebug@local_direct')
 
 # load silicon structure
-cif = orm.CifData(file='/home/yiwu/source/aiida-dftk/examples/Silicon_primitive/Si.cif')
+cif = orm.CifData(file='/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida-dftk/examples/Silicon_primitive/Si.cif')
 structure = cif.get_structure()
 
 # load parameters
@@ -59,7 +59,7 @@ parameters_dict = {
     'code': code,
     'structure': structure,
     'pseudos': pseudos,
-    'rcut': orm.Float(10.0),
+    'pseudo_rcut': orm.Float(10.0),
     'kpoints': kpoints,
     'parameters': parameters,
     'metadata': {

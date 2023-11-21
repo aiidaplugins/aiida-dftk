@@ -42,7 +42,7 @@ class DftkCalculation(CalcJob):
 
         spec.input('structure', valid_type=orm.StructureData, help='structure')
         spec.input_namespace('pseudos', valid_type=UpfData, help='The pseudopotentials.', dynamic=True)
-        spec.input('rcut', required=False, valid_type=orm.Float, help='pseudopotential cutoff radius')
+        spec.input('pseudo_rcut', required=False, valid_type=orm.Float, help='pseudopotential cutoff radius')
         spec.input('kpoints', valid_type=orm.KpointsData, help='kpoint mesh or kpoint path')
         spec.input('parameters', valid_type=orm.Dict, help='input parameters')
         spec.input('settings', valid_type=orm.Dict, required=False, help='Various special settings.')
@@ -108,7 +108,7 @@ class DftkCalculation(CalcJob):
             raise exceptions.InputValidationError('The kpoints input does not have a valid mesh set.')
 
     def _generate_inputdata(
-        self, parameters: orm.Dict, structure: orm.StructureData, pseudos: dict, rcut: orm.Float,
+        self, parameters: orm.Dict, structure: orm.StructureData, pseudos: dict, pseudo_rcut: orm.Float,
         kpoints: orm.KpointsData
     ) -> ty.Tuple[dict, list]:
         """
@@ -132,8 +132,8 @@ class DftkCalculation(CalcJob):
                 'symbol':
                 site.kind_name,
                 'position': [X * units.ang_to_bohr for X in list(site.position)],
-                'rcut':
-                rcut.value,
+                #add rcut like: "pseudopotential_kwargs": {"rcut": 10}
+                'pseudopotential_kwargs': {'rcut': pseudo_rcut.value},
                 'pseudopotential':
                 f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
             })
@@ -178,7 +178,7 @@ class DftkCalculation(CalcJob):
 
         # Generate the input file content
         arguments = [
-            self.inputs.parameters, self.inputs.structure, self.inputs.pseudos, self.inputs.rcut, self.inputs.kpoints
+            self.inputs.parameters, self.inputs.structure, self.inputs.pseudos, self.inputs.pseudo_rcut, self.inputs.kpoints
         ]
         input_filecontent, local_copy_list = self._generate_inputdata(*arguments)
 
