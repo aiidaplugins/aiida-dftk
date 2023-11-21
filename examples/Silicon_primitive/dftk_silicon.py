@@ -6,10 +6,10 @@ DFTKCalculation = CalculationFactory('dftk')
 
 # Setup the code (assuming 'dftk@localhost' exists)
 # change the label to whatever you've set up
-code = orm.load_code('DFTK@local_direct')
+code = orm.load_code('dftk@jed_on_scitas')
 
 # load silicon structure
-cif = orm.CifData(file='/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/Silicon_primitive/Si.cif')
+cif = orm.CifData(file='/home/yiwu/source/aiida-dftk/examples/Silicon_primitive/Si.cif')
 structure = cif.get_structure()
 
 # load parameters
@@ -35,11 +35,14 @@ parameters = orm.Dict({
             'maxiter': 100
         }
     },
-    'postscf': [{
-        '$function': 'compute_forces_cart'
-    }, {
-        '$function': 'compute_stresses_cart'
-    }]
+    'postscf': [
+        # {
+        #     "$function": "compute_forces_cart"
+        # },
+        # {
+        #     "$function": "compute_stresses_cart"
+        # }
+    ]
 })
 
 # set kpoints
@@ -49,13 +52,14 @@ kpoints.set_cell_from_structure(structure)
 kpoints.set_kpoints_mesh([2, 2, 2])
 
 # set pseudos
-ppf = load_group('PseudoDojo/0.4/PBE/SR/standard/upf')
+ppf = load_group('PseudoDojo/0.5/PBE/SR/standard/upf')
 pseudos = ppf.get_pseudos(structure=structure)
 
 parameters_dict = {
     'code': code,
     'structure': structure,
     'pseudos': pseudos,
+    'rcut': orm.Float(10.0),
     'kpoints': kpoints,
     'parameters': parameters,
     'metadata': {
@@ -70,4 +74,4 @@ parameters_dict = {
 }
 
 # Run the calculation
-result = engine.run(DFTKCalculation, **parameters_dict)
+result = engine.submit(DFTKCalculation, **parameters_dict)

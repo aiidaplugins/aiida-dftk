@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Base DFTK WorkChain implementation."""
+from types import FunctionType
+from typing import List, Tuple
+
 from aiida import orm
-from aiida.common import AttributeDict
-from aiida.engine import BaseRestartWorkChain, process_handler, while_
+from aiida.common import AttributeDict, exceptions
+from aiida.engine import BaseRestartWorkChain, ProcessHandlerReport, process_handler, while_
 from aiida.plugins import CalculationFactory
 
 from aiida_dftk.utils import create_kpoints_from_distance, validate_and_prepare_pseudos_inputs
@@ -158,8 +161,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         self.report(f'Action taken: {action}')
 
     @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
-    def handle_scf_convergence_not_reached(self, _):
-        """Handle unconverged SCF calculations."""
+    def handle_scf_convergence_not_reached(self, calculation):
         return None
 
     # Just as a blueprint, delete after ^ is implemented

@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""`Parser` implementation for DFTK."""
 import json
 from os import path
-import pathlib as pl
 from tempfile import TemporaryDirectory
 
 from aiida.common.exceptions import NotExistent
@@ -14,7 +12,6 @@ import h5py
 
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
-
     _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     _DEFAULT_ENERGY_UNIT = 'hartree'
     _DEFAULT_FORCE_FUNCNAME = 'compute_forces_cart'
@@ -29,6 +26,7 @@ class DftkParser(Parser):
         except NotExistent:
             return self.exit_codes.ERROR_NO_RETRIEVED_FOLDER
 
+        parameters = self.node.inputs.parameters.get_dict()
         retrieve_list = self.node.get_attribute('retrieve_list')
         with TemporaryDirectory() as dirpath:
             retrieved.copy_tree(dirpath)
@@ -56,14 +54,15 @@ class DftkParser(Parser):
         return ExitCode(0)
 
     def _parse_output_parameters(self, file_path):
-        """Parse the output file and return a dictionary with results.
+        """
+        Parse the output file and return a dictionary with results.
 
         :param output_file: Output file path
         :return: Dictionary with results
         """
 
-        with open(file_path, 'r', encoding='utf-8') as json_file:
-            data = json.load(json_file)
+        with open(file_path, 'r') as file:
+            data = json.load(file)
 
         # Ignore the 'occupation' and 'eigenvalues' keys
         # TODO: add back for bands after implementation in DFTK
@@ -86,46 +85,41 @@ class DftkParser(Parser):
             return self.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED
 
         self.out('output_parameters', Dict(dict=data))
-        return None
 
     def _parse_output_forces(self, file_path):
-        """Parse the output file and return a dictionary with results.
+        """
+        Parse the output file and return a dictionary with results.
 
         :param output_file: Output file path
         :return: Dictionary with results
         """
-        if not pl.Path(file_path).exists():
-            return self.exit_codes.ERROR_MISSING_FORCES_FILE
+        with h5py.File(file_path, 'r') as f:
+            force_dict = DftkParser._hdf5_to_dict(f)
 
-        with h5py.File(file_path, 'r') as h5file:
-            force_dict = DftkParser._hdf5_to_dict(h5file)
-
-        # TODO: add a check for the forces array agrees with number of atoms
         force_array = ArrayData()
         force_array.set_array('output_forces', force_dict['results'])
         self.out('output_forces', force_array)
-        return None
+
+        # TODO!!!: add a check for the forces array agrees with number of atoms
 
     def _parse_output_stresses(self, file_path):
-        """Parse the output file and return a dictionary with results.
+        """
+        Parse the output file and return a dictionary with results.
 
         :param output_file: Output file path
         :return: Dictionary with results
         """
-        if not pl.Path(file_path).exists():
-            return self.exit_codes.ERROR_MISSING_STRESSES_FILE
-
-        with h5py.File(file_path, 'r') as h5file:
-            stress_dict = DftkParser._hdf5_to_dict(h5file)
+        with h5py.File(file_path, 'r') as f:
+            stress_dict = DftkParser._hdf5_to_dict(f)
 
         stress_array = ArrayData()
         stress_array.set_array('output_stresses', stress_dict['results'])
         self.out('output_stresses', stress_array)
-        return None
 
     @staticmethod
     def _hdf5_to_dict(hdf5_file):
-        """Convert an HDF5 file to a Python dictionary.
+        """
+        Convert an HDF5 file to a Python dictionary.
 
         :param hdf5_file: File or group object from h5py (HDF5 file handle or subgroup)
         :return: Dictionary representation of the HDF5 file or group.

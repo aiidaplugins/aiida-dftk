@@ -2,6 +2,7 @@
 """`CalcJob` implementation for DFTK."""
 import io
 import json
+import os
 import typing as ty
 
 from aiida import orm
@@ -12,7 +13,7 @@ from pymatgen.core import units
 
 
 class DftkCalculation(CalcJob):
-    """`CalcJob` implementation for DFTK."""
+    """`CalcJob` implementation for DFTK"""
 
     _DEFAULT_PREFIX = 'DFTK'
     _DEFAULT_INPUT_EXTENSION = 'json'
@@ -34,13 +35,14 @@ class DftkCalculation(CalcJob):
     def define(cls, spec):
         """Define the process specification."""
         super().define(spec)
-        # Inputs
+        #inputs
         spec.input('metadata.options.prefix', valid_type=str, default=cls._DEFAULT_PREFIX)
         spec.input('metadata.options.stdout_extension', valid_type=str, default=cls._DEFAULT_STDOUT_EXTENSION)
         spec.input('metadata.options.withmpi', valid_type=bool, default=True)
 
         spec.input('structure', valid_type=orm.StructureData, help='structure')
         spec.input_namespace('pseudos', valid_type=UpfData, help='The pseudopotentials.', dynamic=True)
+        spec.input('rcut', required=False, valid_type=orm.Float, help='pseudopotential cutoff radius')
         spec.input('kpoints', valid_type=orm.KpointsData, help='kpoint mesh or kpoint path')
         spec.input('parameters', valid_type=orm.Dict, help='input parameters')
         spec.input('settings', valid_type=orm.Dict, required=False, help='Various special settings.')
@@ -50,12 +52,10 @@ class DftkCalculation(CalcJob):
         options['resources'].default = {'num_machines': 1, 'num_mpiprocs_per_machine': 1}
         options['input_filename'].default = f'{cls._DEFAULT_PREFIX}.{cls._DEFAULT_INPUT_EXTENSION}'
 
-        # Exit codes
-        spec.exit_code(101, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
-        spec.exit_code(102, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
+        #exit codes
         spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge.')
 
-        # Outputs
+        #outputs
         spec.output('output_parameters', valid_type=orm.Dict, help='output parameters')
         spec.output('output_structure', valid_type=orm.Dict, required=False, help='output structure')
         spec.output(
@@ -64,7 +64,7 @@ class DftkCalculation(CalcJob):
         spec.output('output_forces', valid_type=orm.ArrayData, required=False, help='forces array')
         spec.output('output_stresses', valid_type=orm.ArrayData, required=False, help='stresses array')
 
-        # TODO: bands and DOS implementation required on DFTK side
+        # TODO: after bands & DOS implementation in DFTK
         # spec.output('output_bands', valid_type=orm.BandsData, required=False,
         #     help='eigenvalues array')
         # spec.output('output_dos')
@@ -72,9 +72,9 @@ class DftkCalculation(CalcJob):
         spec.default_output_node = 'output_parameters'
 
     def validate_inputs(self):
-        """Validate input parameters.
+        """validate input parameters
 
-        Check that the post-SCF function(s) are supported.
+        check if postscf supported
         """
         parameters = self.inputs.parameters.get_dict()
         if 'postscf' in parameters:
@@ -83,9 +83,9 @@ class DftkCalculation(CalcJob):
                     raise exceptions.InputValidationError(f"Unsupported postscf function: {postscf['$function']}")
 
     def validate_pseudos(self):
-        """Valdiate the pseudopotentials.
+        """validate pseudopotentials
 
-        Check that there is a one-to-one map of kinds in the structure to pseudopotentials.
+         Check that each 'kind' in the input `StructureData` has a corresponding pseudopotential.
         """
         kinds = [kind.name for kind in self.inputs.structure.kinds]
         if set(kinds) != set(self.inputs.pseudos.keys()):
@@ -97,26 +97,29 @@ class DftkCalculation(CalcJob):
             )
 
     def validate_kpoints(self):
-        """Validate the k-points intput.
+        """validate kpoints
 
-        Check that the input k-points provide a k-points mesh.
+        check if kpoints are defined in a mesh grid
+        a list of kpoints will be supported after bands implementation in DFTK
         """
         try:
             self.inputs.kpoints.get_kpoints_mesh()
-        except AttributeError as exc:
-            raise exceptions.InputValidationError('The kpoints input does not have a valid mesh set.') from exc
+        except AttributeError:
+            raise exceptions.InputValidationError('The kpoints input does not have a valid mesh set.')
 
     def _generate_inputdata(
-        self, parameters: orm.Dict, structure: orm.StructureData, pseudos: dict, kpoints: orm.KpointsData
+        self, parameters: orm.Dict, structure: orm.StructureData, pseudos: dict, rcut: orm.Float,
+        kpoints: orm.KpointsData
     ) -> ty.Tuple[dict, list]:
-        """Generate the input dict (json) for DFTK.
+        """
+        generate the input dict(json) for DFTK
 
         :param parameters: a dict defines the calculation parameters for DFTK
         :param structre: a StructureDate define the crystal
         :param pseudos: a dict contains the pseudos
         :param kpoints: a KpointData
         :return: dict for the DFTK json input
-        :return: list of a pseudos needed to be copied
+        :retunr: list of a pseudos needed to be copied
         """
 
         local_copy_pseudo_list = []
@@ -129,6 +132,8 @@ class DftkCalculation(CalcJob):
                 'symbol':
                 site.kind_name,
                 'position': [X * units.ang_to_bohr for X in list(site.position)],
+                'rcut':
+                rcut.value,
                 'pseudopotential':
                 f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
             })
@@ -172,7 +177,9 @@ class DftkCalculation(CalcJob):
         self.validate_kpoints()
 
         # Generate the input file content
-        arguments = [self.inputs.parameters, self.inputs.structure, self.inputs.pseudos, self.inputs.kpoints]
+        arguments = [
+            self.inputs.parameters, self.inputs.structure, self.inputs.pseudos, self.inputs.rcut, self.inputs.kpoints
+        ]
         input_filecontent, local_copy_list = self._generate_inputdata(*arguments)
 
         # write input file

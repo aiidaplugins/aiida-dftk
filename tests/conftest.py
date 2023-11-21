@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=redefined-outer-name,too-many-statements
 """Initialise a text database and profile for pytest."""
+from collections.abc import Mapping
+import io
 import os
+import shutil
+import tempfile
 
 import pytest
 

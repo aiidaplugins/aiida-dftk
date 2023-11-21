@@ -6,7 +6,7 @@ build-backend = 'flit_core.buildapi'
 name = 'aiida-dftk'
 dynamic = ['version']
 description = 'AiiDA plugin for DFTK'
-authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}, {name = 'Yihan Wu', email = 'yihan.wu@epfl.ch'}]
+authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}]
 readme = 'README.md'
 license = {file = 'LICENSE'}
 classifiers = [
@@ -17,12 +17,11 @@ classifiers = [
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
     'Programming Language :: Python :: 3.10',
-    'Programming Language :: Python :: 3.11'
 ]
 keywords = ['aiida', 'workflows']
 requires-python = '>=3.8'
 dependencies = [
-    'aiida_core[atomic_tools]>=2.0',
+    'aiida_core[atomic_tools]~=2.0',
     'click~=8.0',
     'importlib_resources',
     'jsonschema',
@@ -31,8 +30,8 @@ dependencies = [
 ]
 
 [project.urls]
-Home = 'https://github.com/aiidaplugins/aiida-dftk'
-Source = 'https://github.com/aiidaplugins/aiida-dftk'
+Home = 'https://github.com/azadoks/aiida-dftk'
+Source = 'https://github.com/azadoks/aiida-dftk'
 Documentation = 'https://aiida-dftk.readthedocs.io'
 
 [project.optional-dependencies]
@@ -76,7 +75,6 @@ name = 'aiida_dftk'
 exclude = [
     'docs/',
     'tests/',
-    'examples/'
 ]
 
 [tool.flynt]
@@ -96,12 +94,9 @@ ignore = [
     'D203',
     'D213'
 ]
-match = "^((?!examples)(?!test).)*$"
-
 
 [tool.pylint.master]
 load-plugins = ['pylint_aiida']
-ignore-paths = '^examples/.*$'
 
 [tool.pylint.format]
 max-line-length = 120
@@ -111,6 +106,7 @@ generated-members = 'self.exit_codes.*'
 
 [tool.pylint.messages_control]
 disable = [
+    'bad-continuation',
     'duplicate-code',
     'locally-disabled',
     'logging-format-interpolation',
@@ -121,7 +117,6 @@ disable = [
     'too-many-ancestors',
     'too-many-branches',
     'too-many-locals',
-    'fixme'
 ]
 
 [tool.pylint.basic]
@@ -130,8 +125,6 @@ good-names = [
     'j',
     'k',
     'DftkCalculation',
-    'StructureData',
-    'UpfData'
 ]
 
 [tool.pytest.ini_options]
