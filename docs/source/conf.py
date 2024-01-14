@@ -85,7 +85,7 @@ html_static_path = ['_static']
 html_css_files = ['aiida-custom.css', 'aiida-dftk-custom.css']
 html_theme_options = {
     'home_page_in_toc': True,
-    'repository_url': 'https://github.com/azadoks/aiida-dftk',
+    'repository_url': 'https://github.com/aiidaplugins/aiida-dftk',
     'repository_branch': 'develop',
     'use_repository_button': True,
     'use_issues_button': True,
