@@ -49,7 +49,7 @@ Acknowledgements
 .. _aiida-core documentation: https://aiida.readthedocs.io/projects/aiida-core/en/latest/intro/get_started.html
 
 .. |aiida-dftk| replace:: ``aiida-dftk``
-.. _aiida-dftk: https://github.com/azadoks/aiida-dftk
+.. _aiida-dftk: https://github.com/aiidaplugins/aiida-dftk
 
 .. _AiiDA: http://aiida.net
 
@@ -64,4 +64,4 @@ Acknowledgements
 .. _`swissuniversities P-5 project "Materials Cloud"`: https://www.materialscloud.org/swissuniversities
 
 .. |README.md of the repository| replace:: ``README.md`` of the repository
-.. _README.md of the repository: https://github.com/azadoks/aiida-dftk/blob/develop/README.md
+.. _README.md of the repository: https://github.com/aiidaplugins/aiida-dftk/blob/develop/README.md
