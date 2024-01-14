@@ -18,11 +18,9 @@ and usage of the AiiDA-DFTK plugin:
 1. [**Set-up:**](docs/source/1-setup.md)
    Learn how to set up the AiiDA-DFTK plugin.
 2. [**Calculations:**](docs/source/2-calculation.md)
-   Discover how to run a DFTK calculation using AiiDA.
-3. [**Workchain:**](docs/source/3-workchain.md)
-   Understand how to run a DFTK calculation using AiiDA's DftkBaseWorkchain.
-4. [**Common Workflow:**](docs/source/4-common-workflow.md)
-   Explore how to run a DFTK calculation using AiiDA's common workflow.
+   Discover how to run DFTK calculations using AiiDA.
+3. [**Common Workflow:**](docs/source/3-common-workflow.md)
+   Explore how to run a DFTK calculation using AiiDA's common workflow system.
 
 ## Contact
 AiiDA-DFTK is developed and maintained by:

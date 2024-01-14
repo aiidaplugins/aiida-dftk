@@ -1,17 +1,4 @@
-# 4. Running a DFTK Calculation for MoS2 using AiiDA Common Workflow
-
-## Table of Contents
-
-- [4. Running a DFTK Calculation for MoS2 using AiiDA Common Workflow](#4-running-a-dftk-calculation-for-mos2-using-aiida-common-workflow)
-  - [Table of Contents](#table-of-contents)
-  - [Step 1: Installing aiida-common-workflows for DFTK](#step-1-installing-aiida-common-workflows-for-dftk)
-  - [Step 2: Modifying the Protocol Configuration](#step-2-modifying-the-protocol-configuration)
-  - [Step 3: Setting Up the Structure](#step-3-setting-up-the-structure)
-  - [Step 4: Using the Common Workflow](#step-4-using-the-common-workflow)
-    - [Note on electronic\_type](#note-on-electronic_type)
-  - [Step 5: Running the Calculation](#step-5-running-the-calculation)
-
----
+# 3. Running a DFTK Calculation for MoS2 using AiiDA Common Workflow
 
 ## Step 1: Installing aiida-common-workflows for DFTK
 

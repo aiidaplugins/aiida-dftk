@@ -52,10 +52,6 @@ You can now proceed with DFTK calculations in this isolated environment.
 ### Step 1: Setting Up aiida-core
 Follow the [official aiida-core setup tutorial](https://aiida.readthedocs.io/projects/aiida-core/en/latest/intro/get_started.html).
 Make sure you have a working `aiida-core` installation.
-Additionally you will need `aiida-pseudo`, e.g. by issuing
-```bash
-pip install aiida-pseudo
-```
 
 ### Step 2: Installing the aiida-DFTK Plugin
 Install the aiida-dftk plugin repository from github and install it locally:

@@ -1,91 +1,70 @@
-# 2. Running an Example DFTK Calculation on Silicon using AiiDA
+# 2. Running an example DFTK Calculation on Silicon using AiiDA
 
-This tutorial provides step-by-step instructions to run a DFTK calculation on a silicon crystal using AiiDA. We'll cover the following components:
+This tutorial provides an example to run a DFTK calculation on a
+silicon crystal using AiiDA.
 
-1. **Structure**: Setting up the silicon crystal structure.
-2. **Code**: Loading the DFTK code.
-3. **Pseudopotentials**: Specifying the pseudopotentials for silicon.
-4. **K-points**: Defining the k-point mesh for the calculation.
-5. **Parameters**: Setting up the computational parameters.
+Before proceeding, make sure you've completed
+the [development environment setup tutorial](1-setup.md).
+This will ensure that you have both the Julia and Python sides
+ready for DFTK calculations through AiiDA.
+In this example we will assume you have set up the DFTK code
+under the label `DFTK@jed`.
 
----
+The calculation is based on a silicon CIF file,
+which you can download at
+[Si.cif](https://github.com/aiidaplugins/aiida-dftk/raw/b59e9b9395366002c8591776ad293275952c0001/examples/Silicon/Si.cif).
 
-## Preparing the Environment
-
-Before proceeding, make sure you've completed the [development environment setup tutorial](#). This will ensure that you have both the Julia and Python sides ready for DFTK calculations through AiiDA.
-
----
-
-## Step 1: Setting Up the Structure
-
-The structure of silicon will be read from a CIF file.
+## Single calculation python script
+The following script runs a DFTK calculation using the basic DFTK workchain:
 
 ```python
-from aiida import orm
+import aiida
+import os.path
+from aiida import engine, orm
+from aiida_dftk.workflows.base import DftkBaseWorkChain
 
-cif = orm.CifData(file="/path/to/your/Si.cif")
-structure = cif.get_structure()
-```
+# Load the default Aiida profile
+aiida.load_profile()
 
----
+# Get builder for setting up the workchain
+builder = DftkBaseWorkChain.get_builder()
 
-## Step 2: Loading the DFTK Code
+# Attach code to run calculation:
+# Note: Change the label here to whatever you have set it up as.
+builder.dftk.code = orm.load_code('DFTK')
 
-Assuming you've already set up the DFTK code in AiiDA (as per the development environment setup), you can load it as follows:
+# Attach the structure from the CIF file
+file = os.path.abspath("Si.cif")
+structure = orm.CifData(file=file).get_structure()
+builder.dftk.structure = structure
 
-```python
-code = orm.load_code('DFTK@local_direct')
-```
-
----
-
-## Step 3: Specifying Pseudopotentials
-
-You can specify the pseudopotentials using a pre-loaded pseudopotential group. Here, we assume that you have a group named "PseudoDojo/0.4/PBE/SR/standard/upf".
-
-```python
-ppf = load_group("PseudoDojo/0.4/PBE/SR/standard/upf")
-pseudos = ppf.get_pseudos(structure=structure)
-```
-
----
-
-## Step 4: Setting Up K-points
-
-Define the k-point mesh for the calculation:
-
-```python
+# Specify the k-point mesh
 kpoints = orm.KpointsData()
-kpoints.set_cell_from_structure(structure)
-kpoints.set_kpoints_mesh([2, 2, 2])
-```
+kpoints.set_kpoints_mesh([4, 4, 4])
+builder.kpoints = kpoints
 
----
+# Specify pseudopotentials
+ppf = orm.load_group("PseudoDojo/0.5/PBE/SR/standard/upf")
+builder.dftk.pseudos = ppf.get_pseudos(structure=structure)
 
-## Step 5: Setting Up Parameters
-
-The computational parameters for the DFTK calculation are specified using an `orm.Dict` object in AiiDA. Below is a breakdown of the parameters you can set:
-
-```python
-parameters = orm.Dict({
+# Setup some DFTK-specific parameters (all units in Hartree / atomic units)
+# See some explanation below.
+builder.dftk.parameters = orm.Dict({
     "model_kwargs": {
         "xc": [":gga_x_pbe", ":gga_c_pbe"],  # Exchange-correlation functional
-        "temperature": 0.001,  # Electronic temperature in Hartree
+        "temperature": 0.001,                # Electronic temperature
         "smearing": {
-            "$symbol": "Smearing.Gaussian"  # Type of smearing
+            "$symbol": "Smearing.Gaussian"   # Type of smearing
         }
     },
     "basis_kwargs": {
-        "Ecut": 6  # Plane-wave cutoff energy in Hartree
+        "Ecut": 20  # Plane-wave cutoff energy
     },
     "scf": {
-        "$function": "self_consistent_field",  # SCF calculation function
-        "checkpointfile": "scfres.jld2",  # File to save the SCF results
+        "$function": "self_consistent_field",  # Single-point SCF
+        "checkpointfile": "scfres.jld2",  # Checkpoint and output file
         "$kwargs": {
-            "is_converged": {
-                "$symbol": "ScfConvergenceEnergy",  # Convergence criterion
-                "$args": 1.0e-2  # Convergence threshold
-            },
+            "tol": 1e-6,    # Convergence tolerance
             "maxiter": 100  # Maximum SCF iterations
         }
     },
@@ -93,65 +72,46 @@ parameters = orm.Dict({
         {
             "$function": "compute_forces_cart"  # Compute Cartesian forces
         },
-        {
-            "$function": "compute_stresses_cart"  # Compute Cartesian stresses
-        }
     ]
 })
+
+# Set options to use 1 process only
+builder.dftk.metadata.options.withmpi = False
+builder.dftk.metadata.options.resources = {'num_machines': 1, 'num_mpiprocs_per_machine': 1}
+
+# Finally we run the calculation
+result = engine.run(builder)
 ```
-
-### Explanation of Parameters
-
-- `model_kwargs`: Keywords arguments for setting up the DFT model. It includes the exchange-correlation functional (`xc`) (any functionals supported by [Libxc](https://www.tddft.org/programs/libxc/functionals/)), electronic temperature (`temperature`), and the type of electronic smearing (`smearing`).
-
-- `basis_kwargs`: Contains parameters for the plane-wave basis set. Here, `Ecut` specifies the plane-wave cutoff energy in Hartree.
-
-- `scf`: Parameters related to the self-consistent field (SCF) calculations. It includes the function to perform SCF (`$function`), a file to save the SCF results (`checkpointfile`), and additional arguments like convergence criteria (`is_converged`) and maximum iterations (`maxiter`).
-
-- `postscf`: A list of functions to perform post-SCF calculations. Currently, only Cartesian forces (`compute_forces_cart`) and stresses (`compute_stresses_cart`) are supported.
-
-
+Note that the parameters specified above as an `orm.Dict` are thin
+wrappers around the arguments and keyword arguments of appropriate
+Julia functions in DFTK.
+See the [`AiidaDFTK` documentation](https://mfherbst.github.io/AiidaDFTK.jl/stable/input_output/)
+as well as the [DFTK documentation](https://docs.dftk.org) for details.
 
 ---
 
-
-## Running the Calculation
-
-Run the DFTK calculation using AiiDA's `run` method:
-
+Instead of using the DFTK workchain (which automatically restarts and reschedules
+calculations) you can also run a single calculation only. THis is done by running
+DFTK `CalcJob`, which is done using the builder
 ```python
-from aiida import engine
 from aiida.plugins import CalculationFactory
-
-DFTKCalculation = CalculationFactory('dftk')
-
-parameters_dict = {
-    'code': code,
-    'structure': structure,
-    'pseudos': pseudos,
-    'kpoints': kpoints,
-    'parameters': parameters,
-    'metadata': {
-        'options': {
-            'withmpi': False,
-            'resources': {
-                'num_machines': 1,
-                'num_mpiprocs_per_machine': 1,
-            }
-        }
-    }
-}
-
-result = engine.run(DFTKCalculation, **parameters_dict)
+builder = CalculationFactory('dftk').get_builder()
 ```
+and replacing all `builder.dftk.<x.y.z>` parts in the above script by simply
+a `builder.<x.y.z>` prefix.
 
 ---
 
 ## Visualizing the Provenance Graph
 
-After execution, generate a provenance graph for the calculation with the following command:
+After execution, first find the PK of the calculation:
+```bash
+verdi process list -a
+```
+
+Then generate a provenance graph for the calculation
+with the following command:
 
 ```bash
-verdi node graph generate [PK of your process]
+verdi node graph generate [PK from above]
 ```
-The graph should have 5 data nodes (`InstalledCode`, `UpfData`, `StructureData`, `KpointsData`, `Input_parameters`) as inputs to the process node and 5 output data nodes (`RemoteData`, `RetrievedFolder`, `Output_parameters`, `Output_forces`, `Output_stresses`).
