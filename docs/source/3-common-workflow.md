@@ -1,9 +1,8 @@
 # 3. Running a DFTK Calculation for MoS2 using AiiDA Common Workflow
 
 ## Step 1: Installing aiida-common-workflows for DFTK
-
-First, you'll need to install the `aiida-common-workflows` plugin that supports DFTK. Clone the repository and install it locally:
-
+First, you'll need to install the `aiida-common-workflows` plugin that supports DFTK,
+for which a local fork of the common workflows is needed:
 ```bash
 git clone https://github.com/WuyihanVictor/aiida-common-workflows.git
 cd aiida-common-workflows
@@ -11,13 +10,17 @@ git checkout dftk_implementation
 pip install -e .
 ```
 
-> **Note**: This plugin is compatible with AiiDA v2.0+ and currently supports Quantum Espresso and DFTK.
+**Note**: This plugin is compatible with AiiDA v2.0+
+and currently supports Quantum Espresso and DFTK.
 
 ---
 
 ## Step 2: Modifying the Protocol Configuration
 
-Next, you'll need to modify the `protocol.yml` file to specify the DFTK-related settings. The `protocol.yml` contains various protocol configurations like 'fast', 'moderate', 'precise', etc. Each protocol contains a `base` section that outlines parameters for the `DFTKBaseWorkChain`.
+Next, you'll need to modify the `protocol.yml` file to specify the DFTK-related
+settings. The `protocol.yml` contains various protocol configurations like
+'fast', 'moderate', 'precise', etc. Each protocol contains a `base` section
+that outlines parameters for the `DFTKBaseWorkChain`.
 
 Here's an example snippet from `protocol.yml`:
 
@@ -28,14 +31,14 @@ fast:
     pseudo_family: "PseudoDojo/0.4/PBE/SR/standard/upf"
     cutoff_stringency: "low"
     base:
-        kpoints_distance: 1 # [1/AA]
+        kpoints_distance: 1  # [1/AA]
         dftk:
             parameters:
                 model_kwargs:
                     xc: [":gga_x_pbe", ":gga_c_pbe"]
                     smearing:
                         $symbol: "Smearing.FermiDirac"
-                    temperature: 0.00225 # Ha
+                    temperature: 0.00225  # Ha
                 scf:
                     $kwargs:
                         maxiter: 100
@@ -96,8 +99,13 @@ By default, the `electronic_type` is set to `METAL`.
 Finally, run the DFTK calculation.
 
 ```python
-builder = RelaxWorkChain.get_input_generator().get_builder(structure=structure, engines=engines, protocol='fastest', electronic_type=ElectronicType.METAL)
+builder = RelaxWorkChain.get_input_generator().get_builder(
+    structure=structure,
+    engines=engines,
+    protocol='fastest',
+    electronic_type=ElectronicType.METAL)
 result = engine.run(builder)
 ```
 
-Here, `protocol='fastest'` specifies the protocol to use, and `electronic_type=ElectronicType.METAL` sets the electronic type.
+Here, `protocol='fastest'` specifies the protocol to use,
+and `electronic_type=ElectronicType.METAL` sets the electronic type.
