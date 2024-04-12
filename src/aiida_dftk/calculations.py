@@ -18,7 +18,7 @@ class DftkCalculation(CalcJob):
     _DEFAULT_INPUT_EXTENSION = 'json'
     _DEFAULT_STDOUT_EXTENSION = 'txt'
     _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
-    _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart']
+    _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart','compute_bands']
     _PSEUDO_SUBFOLDER = './pseudo/'
 
     @staticmethod
@@ -126,11 +126,9 @@ class DftkCalculation(CalcJob):
         data['periodic_system']['atoms'] = []
         for site in structure.sites:
             data['periodic_system']['atoms'].append({
-                'symbol':
-                site.kind_name,
+                'symbol': site.kind_name,
                 'position': [X * units.ang_to_bohr for X in list(site.position)],
-                'pseudopotential':
-                f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
+                'pseudopotential': f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
             })
             pseudo = pseudos[site.kind_name]
             local_copy_pseudo_list.append((pseudo.uuid, pseudo.filename, f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'))
