@@ -41,6 +41,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             cls.validate_parameters,
             cls.validate_kpoints,
             cls.validate_pseudos,
+            cls.validate_resources,
             while_(cls.should_run_process)(
                 cls.prepare_process,
                 cls.run_process,
@@ -76,7 +77,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         Also define dictionary `inputs` in the context, that will contain the inputs for the calculation that will be
         launched in the `run_calculation` step.
         """
-        super().setup()
+        #super().setup()
         self.ctx.inputs.parameters = self.ctx.inputs.parameters.get_dict()
         self.ctx.inputs.settings = self.ctx.inputs.settings.get_dict() if 'settings' in self.ctx.inputs else {}
 

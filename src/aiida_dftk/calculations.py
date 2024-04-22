@@ -20,6 +20,7 @@ class DftkCalculation(CalcJob):
     _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart','compute_bands']
     _PSEUDO_SUBFOLDER = './pseudo/'
+    _MIN_OUTPUT_BUFFER_TIME = 1
 
     @staticmethod
     def _merge_dicts(dict1, dict2):
@@ -38,6 +39,7 @@ class DftkCalculation(CalcJob):
         spec.input('metadata.options.prefix', valid_type=str, default=cls._DEFAULT_PREFIX)
         spec.input('metadata.options.stdout_extension', valid_type=str, default=cls._DEFAULT_STDOUT_EXTENSION)
         spec.input('metadata.options.withmpi', valid_type=bool, default=True)
+        spec.input('metadata.options.max_wallclock_seconds', valid_type=int, default=1800)
 
         spec.input('structure', valid_type=orm.StructureData, help='structure')
         spec.input_namespace('pseudos', valid_type=UpfData, help='The pseudopotentials.', dynamic=True)
@@ -51,10 +53,14 @@ class DftkCalculation(CalcJob):
         options['input_filename'].default = f'{cls._DEFAULT_PREFIX}.{cls._DEFAULT_INPUT_EXTENSION}'
 
         # Exit codes
+        spec.exit_code(100, 'ERROR_MISSING_SCFRES_FILE', message='The output file containing SCF results is missing.')
         spec.exit_code(101, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
         spec.exit_code(102, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
-        spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge.')
-
+        spec.exit_code(103, 'ERROR_MISSING_BANDS_FILE',message='The output file containing bands is missing.')
+        spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge, and the POSTSCF functions were not executed.')
+        spec.exit_code(501, 'ERROR_SCF_OUT_OF_WALLTIME',message='The SCF was interuptted due to out of walltime. Non-recovarable error.')
+        spec.exit_code(502, 'ERROR_POSTSCF_OUT_OF_WALLTIME',message='The POSTSCF was interuptted due to out of walltime.')
+        
         # Outputs
         spec.output('output_parameters', valid_type=orm.Dict, help='output parameters')
         spec.output('output_structure', valid_type=orm.Dict, required=False, help='output structure')
@@ -70,6 +76,20 @@ class DftkCalculation(CalcJob):
         # spec.output('output_dos')
 
         spec.default_output_node = 'output_parameters'
+
+    def validate_options(self):
+        """Validate the options input.
+        
+        Check that the wihmpi option is set to True if the number of mpiprocs is greater than 1.
+        Check max_wallclock_seconds is greater than the min_output_buffer_time.
+        """
+        options = self.inputs.metadata.options
+        if options.withmpi is False and options.resources.get('num_mpiprocs_per_machine', 1) > 1:
+            raise exceptions.InputValidationError('MPI is required when num_mpiprocs_per_machine > 1.')
+        if options.max_wallclock_seconds < self._MIN_OUTPUT_BUFFER_TIME:
+            raise exceptions.InputValidationError(
+                f'max_wallclock_seconds must be greater than {self._MIN_OUTPUT_BUFFER_TIME}.'
+            )
 
     def validate_inputs(self):
         """Validate input parameters.
@@ -133,6 +153,16 @@ class DftkCalculation(CalcJob):
             pseudo = pseudos[site.kind_name]
             local_copy_pseudo_list.append((pseudo.uuid, pseudo.filename, f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'))
         data['basis_kwargs']['kgrid'], data['basis_kwargs']['kshift'] = kpoints.get_kpoints_mesh()
+
+        # set the maxtime for the SCF cycle
+        # if max_wallclock_seconds is smaller than 600 seconds, set the maxtime as max_wallclock_seconds - MIN_OUTPUT_BUFFER_TIME
+        # else set the maxtime as int(0.95 * max_wallclock_seconds)
+        if self.inputs.metadata.options.max_wallclock_seconds < 600:
+            maxtime = self.inputs.metadata.options.max_wallclock_seconds - self._MIN_OUTPUT_BUFFER_TIME 
+        else:
+            maxtime = int(0.95 * self.inputs.metadata.options.max_wallclock_seconds)
+        data['scf']['maxtime'] = maxtime
+        
         DftkCalculation._merge_dicts(data, parameters.get_dict())
 
         return data, local_copy_pseudo_list
@@ -165,6 +195,7 @@ class DftkCalculation(CalcJob):
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
 
+        self.validate_options()
         self.validate_inputs()
         self.validate_pseudos()
         self.validate_kpoints()

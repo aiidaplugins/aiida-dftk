@@ -9,6 +9,9 @@ from aiida.common.exceptions import NotExistent
 from aiida.engine import ExitCode
 from aiida.orm import ArrayData, Dict
 from aiida.parsers import Parser
+
+from aiida_dftk.calculations import DftkCalculation
+
 import h5py
 
 
@@ -21,6 +24,8 @@ class DftkParser(Parser):
     _DEFAULT_FORCE_UNIT = 'hartree/bohr'
     _DEFAULT_STRESS_FUNCNAME = 'compute_stresses_cart'
     _DEFAULT_STRESS_UNIT = 'hartree/bohr^3'
+    _DEFAULT_BANDS_FUNCNAME = 'compute_bands'
+    _DEFAULT_BANDS_UNIT = 'hartree'
 
     def parse(self, **kwargs):
         """Parse DFTK output files."""
@@ -33,6 +38,15 @@ class DftkParser(Parser):
         with TemporaryDirectory() as dirpath:
             retrieved.copy_tree(dirpath)
 
+            # if ran_out_of_walltime (terminated illy)
+            if self.node.exit_status == DftkCalculation.exit_codes.ERROR_SCHEDULER_OUT_OF_WALLTIME.status:
+                # if _DEFAULT_SCFRES_SUMMARY_NAME is not in the list retrieved.list_object_names(), SCF terminated illy
+                if self._DEFAULT_SCFRES_SUMMARY_NAME not in retrieved.list_object_names():
+                    return self.exit_codes.ERROR_SCF_OUT_OF_WALLTIME
+                # POSTSCF terminated illy
+                else:
+                    return self.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
+        
             #catch exceptions from SCF, forces, stresses
             # TODO: handle exceptions for future supported postscf (bands, dos)
             if self._DEFAULT_SCFRES_SUMMARY_NAME in retrieve_list:
@@ -52,6 +66,13 @@ class DftkParser(Parser):
                 exit_code = self._parse_output_stresses(file_path)
                 if exit_code is not None:
                     return exit_code
+                
+            #TODO: parser for bands results
+            # if f'{self._DEFAULT_BANDS_FUNCNAME}.json' in retrieve_list:
+            #     file_path = path.join(dirpath, f'{self._DEFAULT_BANDS_FUNCNAME}.json')
+            #     exit_code = self._parse_output_bands(file_path)
+            #     if exit_code is not None:
+            #         return exit_code
 
         return ExitCode(0)
 
@@ -81,11 +102,12 @@ class DftkParser(Parser):
 
         data['fermi_level_unit'] = self._DEFAULT_ENERGY_UNIT
 
+        self.out('output_parameters', Dict(dict=data))
+        
         # Check for 'converged'
         if not data.get('converged'):
             return self.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED
 
-        self.out('output_parameters', Dict(dict=data))
         return None
 
     def _parse_output_forces(self, file_path):
