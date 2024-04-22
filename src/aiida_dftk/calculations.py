@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """`CalcJob` implementation for DFTK."""
 import io
+import os
 import json
 import typing as ty
 
@@ -20,7 +21,7 @@ class DftkCalculation(CalcJob):
     _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart','compute_bands']
     _PSEUDO_SUBFOLDER = './pseudo/'
-    _MIN_OUTPUT_BUFFER_TIME = 1
+    _MIN_OUTPUT_BUFFER_TIME = 60
 
     @staticmethod
     def _merge_dicts(dict1, dict2):
@@ -46,6 +47,7 @@ class DftkCalculation(CalcJob):
         spec.input('kpoints', valid_type=orm.KpointsData, help='kpoint mesh or kpoint path')
         spec.input('parameters', valid_type=orm.Dict, help='input parameters')
         spec.input('settings', valid_type=orm.Dict, required=False, help='Various special settings.')
+        spec.input('parent_folder', valid_type=orm.RemoteData, required=False, help='A remote folder used for restarts.')
 
         options = spec.inputs['metadata']['options']
         options['parser_name'].default = 'dftk'
@@ -157,10 +159,10 @@ class DftkCalculation(CalcJob):
         # set the maxtime for the SCF cycle
         # if max_wallclock_seconds is smaller than 600 seconds, set the maxtime as max_wallclock_seconds - MIN_OUTPUT_BUFFER_TIME
         # else set the maxtime as int(0.95 * max_wallclock_seconds)
-        if self.inputs.metadata.options.max_wallclock_seconds < 600:
+        if self.inputs.metadata.options.max_wallclock_seconds < self._MIN_OUTPUT_BUFFER_TIME * 10:
             maxtime = self.inputs.metadata.options.max_wallclock_seconds - self._MIN_OUTPUT_BUFFER_TIME 
         else:
-            maxtime = int(0.95 * self.inputs.metadata.options.max_wallclock_seconds)
+            maxtime = int(0.9 * self.inputs.metadata.options.max_wallclock_seconds)
         data['scf']['maxtime'] = maxtime
         
         DftkCalculation._merge_dicts(data, parameters.get_dict())
@@ -194,11 +196,18 @@ class DftkCalculation(CalcJob):
             the calculation.
         :return: `aiida.common.datastructures.CalcInfo` instance
         """
+        # Process the `settings`` so that capitalization isn't an issue
+        settings = self.inputs.settings.get_dict()
+
 
         self.validate_options()
         self.validate_inputs()
         self.validate_pseudos()
         self.validate_kpoints()
+
+        # Create lists which specify files to copy and symlink
+        remote_copy_list = []
+        remote_symlink_list = []
 
         # Generate the input file content
         arguments = [self.inputs.parameters, self.inputs.structure, self.inputs.pseudos, self.inputs.kpoints]
@@ -208,6 +217,28 @@ class DftkCalculation(CalcJob):
         input_filename = folder.get_abs_path(self.metadata.options.input_filename)
         with io.open(input_filename, 'w', encoding='utf-8') as stream:
             json.dump(input_filecontent, stream)
+
+        # List the files (scfres.jld2) to copy or symlink in the case of a restart
+        if 'parent_folder' in self.inputs:
+            # Symlink by default if on the same computer, otherwise copy by default
+            same_computer = self.inputs.code.computer.uuid == self.inputs.parent_folder.computer.uuid
+            if settings.pop('PARENT_FOLDER_SYMLINK', same_computer):
+                remote_symlink_list.append(
+                    (
+                    self.inputs.parent_folder.computer.uuid,
+                    os.path.join(self.inputs.parent_folder.get_remote_path(), self.inputs.parameters['scf']['checkpointfile']),
+                    self.inputs.parameters['scf']['checkpointfile']
+                    )
+                )
+
+            else:
+                remote_copy_list.append(
+                    (
+                    self.inputs.parent_folder.computer.uuid,
+                    os.path.join(self.inputs.parent_folder.get_remote_path(), self.inputs.parameters['scf']['checkpointfile']),
+                    self.inputs.parameters['scf']['checkpointfile']
+                    )
+                )
 
         # prepare command line parameters
         cmdline_params = self._generate_cmdline_params()
@@ -227,6 +258,8 @@ class DftkCalculation(CalcJob):
         calcinfo.codes_info = [codeinfo]
         calcinfo.stdout_name = f'{self._DEFAULT_PREFIX}.{self._DEFAULT_STDOUT_EXTENSION}'
         calcinfo.retrieve_list = retrieve_list
+        calcinfo.remote_symlink_list = remote_symlink_list
+        calcinfo.remote_copy_list = remote_copy_list
         calcinfo.local_copy_list = local_copy_list
 
         return calcinfo
