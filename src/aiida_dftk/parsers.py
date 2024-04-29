@@ -4,16 +4,21 @@ import json
 from os import path
 import pathlib as pl
 from tempfile import TemporaryDirectory
+import numpy as np
 
 from aiida.common.exceptions import NotExistent
 from aiida.engine import ExitCode
 from aiida.orm import ArrayData, Dict
 from aiida.parsers import Parser
+from aiida.plugins import DataFactory
+
 
 from aiida_dftk.calculations import DftkCalculation
 
 import h5py
 
+# DataFactory is used to create the BandsData object
+BandsData = DataFactory('array.bands')
 
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
@@ -68,11 +73,11 @@ class DftkParser(Parser):
                     return exit_code
                 
             #TODO: parser for bands results
-            # if f'{self._DEFAULT_BANDS_FUNCNAME}.json' in retrieve_list:
-            #     file_path = path.join(dirpath, f'{self._DEFAULT_BANDS_FUNCNAME}.json')
-            #     exit_code = self._parse_output_bands(file_path)
-            #     if exit_code is not None:
-            #         return exit_code
+            if f'{self._DEFAULT_BANDS_FUNCNAME}.json' in retrieve_list:
+                file_path = path.join(dirpath, f'{self._DEFAULT_BANDS_FUNCNAME}.json')
+                exit_code = self._parse_output_bands(file_path)
+                if exit_code is not None:
+                    return exit_code
 
         return ExitCode(0)
 
@@ -143,6 +148,36 @@ class DftkParser(Parser):
         stress_array = ArrayData()
         stress_array.set_array('output_stresses', stress_dict['results'])
         self.out('output_stresses', stress_array)
+        return None
+    
+    def _parse_output_bands(self, file_path):
+        """Parse the compute_bands.json output file and return a BandsData.
+
+        :param output_file: Output file path
+        :return: BandsData
+        """
+        if not pl.Path(file_path).exists():
+            return self.exit_codes.ERROR_MISSING_BANDS_FILE
+
+        with open(file_path, 'r', encoding='utf-8') as json_file:
+            bands_dict = json.load(json_file)
+        
+        if bands_dict['diagonalization']['converged'] is False:
+            return self.exit_codes.ERROR_BANDS_CONVERGENCE_NOT_REACHED
+        
+        bands_data = BandsData()
+        kpath = bands_dict['kcoords']
+        eigen_array = np.array(bands_dict['eigenvalues'])
+        nspin = bands_dict['n_spin_components']
+        nkpoints = bands_dict['n_kpoints']
+        nbands = bands_dict['n_bands']
+
+        bands = eigen_array.reshape(nspin, nkpoints, nbands)
+
+        bands_data.set_kpoints(kpoints=kpath)
+        bands_data.set_bands(bands, units=self._DEFAULT_BANDS_UNIT)
+        self.out('output_bands', bands_data)
+
         return None
 
     @staticmethod

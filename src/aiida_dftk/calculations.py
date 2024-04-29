@@ -62,7 +62,8 @@ class DftkCalculation(CalcJob):
         spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge, and the POSTSCF functions were not executed.')
         spec.exit_code(501, 'ERROR_SCF_OUT_OF_WALLTIME',message='The SCF was interuptted due to out of walltime. Non-recovarable error.')
         spec.exit_code(502, 'ERROR_POSTSCF_OUT_OF_WALLTIME',message='The POSTSCF was interuptted due to out of walltime.')
-        
+        spec.exit_code(503, 'ERROR_BANDS_CONVERGENCE_NOT_REACHED', message='The BANDS minimization cycle did not converge.')
+
         # Outputs
         spec.output('output_parameters', valid_type=orm.Dict, help='output parameters')
         spec.output('output_structure', valid_type=orm.Dict, required=False, help='output structure')
@@ -71,6 +72,7 @@ class DftkCalculation(CalcJob):
         )
         spec.output('output_forces', valid_type=orm.ArrayData, required=False, help='forces array')
         spec.output('output_stresses', valid_type=orm.ArrayData, required=False, help='stresses array')
+        spec.output('output_bands', valid_type=orm.BandsData, required=False, help='bandstructure')
 
         # TODO: bands and DOS implementation required on DFTK side
         # spec.output('output_bands', valid_type=orm.BandsData, required=False,
@@ -182,7 +184,11 @@ class DftkCalculation(CalcJob):
         :returns: list of files to retreive
         """
         parameters = parameters.get_dict()
-        retrieve_list = [f"{item['$function']}.hdf5" for item in parameters['postscf']]
+        # Retrieve the postscf files, all function.hdf5 except compute_bands.json
+        retrieve_list = [
+            f"{item['$function']}.json" if item['$function'] == 'compute_bands' else f"{item['$function']}.hdf5"
+            for item in parameters['postscf']
+        ]
         retrieve_list.append(f'{self._DEFAULT_PREFIX}.log')
         retrieve_list.append('timings.json')
         retrieve_list.append(f'{self._DEFAULT_PREFIX}.{self._DEFAULT_STDOUT_EXTENSION}')

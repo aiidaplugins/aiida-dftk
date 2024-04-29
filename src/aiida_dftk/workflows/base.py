@@ -168,8 +168,8 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED,
         DftkCalculation.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
         ])
-    def handle_out_of_walltime(self, calculation):
-        """Handle `ERROR_OUT_OF_WALLTIME` exit code: calculation shut down neatly and we can simply restart."""
+    def handle_recoverable_SCF_unconverged_and_POSTSCF_out_of_walltime_(self, calculation):
+        """Handle `RROR_SCF_CONVERGENCE_NOT_REACHED` and `ERROR_POSTSCF_OUT_OF_WALLTIME` exit code: calculations shut down neatly and we can simply restart."""
         try:
             self.ctx.inputs.structure = calculation.outputs.output_structure
         except exceptions.NotExistent:
