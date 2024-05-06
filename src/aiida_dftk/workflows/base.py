@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Base DFTK WorkChain implementation."""
 from aiida import orm
-from aiida.common import AttributeDict
-from aiida.engine import BaseRestartWorkChain, process_handler, while_
+from aiida.common import AttributeDict, exceptions
+from aiida.engine import BaseRestartWorkChain, ProcessHandlerReport, process_handler, while_
 from aiida.plugins import CalculationFactory
 
 from aiida_dftk.utils import create_kpoints_from_distance, validate_and_prepare_pseudos_inputs
@@ -41,6 +41,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             cls.validate_parameters,
             cls.validate_kpoints,
             cls.validate_pseudos,
+            cls.validate_resources,
             while_(cls.should_run_process)(
                 cls.prepare_process,
                 cls.run_process,
@@ -76,7 +77,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         Also define dictionary `inputs` in the context, that will contain the inputs for the calculation that will be
         launched in the `run_calculation` step.
         """
-        super().setup()
+        #super().setup()
         self.ctx.inputs.parameters = self.ctx.inputs.parameters.get_dict()
         self.ctx.inputs.settings = self.ctx.inputs.settings.get_dict() if 'settings' in self.ctx.inputs else {}
 
@@ -163,18 +164,21 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         return None
 
     # Just as a blueprint, delete after ^ is implemented
-    # @process_handler(priority=580, exit_codes=[
-    #     DftkCalculation.exit_codes.ERROR_OUT_OF_WALLTIME,
-    #     ])
-    # def handle_out_of_walltime(self, calculation):
-    #     """Handle `ERROR_OUT_OF_WALLTIME` exit code: calculation shut down neatly and we can simply restart."""
-    #     try:
-    #         self.ctx.inputs.structure = calculation.outputs.output_structure
-    #     except exceptions.NotExistent:
-    #         self.ctx.restart_calc = calculation
-    #         self.report_error_handled(calculation, 'restart from the last calculation')
-    #     else:
-    #         self.ctx.restart_calc = None
-    #         self.report_error_handled(calculation, 'out of walltime: structure changed, so restarting from scratch')
+    @process_handler(priority=580, exit_codes=[
+        DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED,
+        DftkCalculation.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
+        ])
+    def handle_recoverable_SCF_unconverged_and_POSTSCF_out_of_walltime_(self, calculation):
+        """Handle `RROR_SCF_CONVERGENCE_NOT_REACHED` and `ERROR_POSTSCF_OUT_OF_WALLTIME` exit code: calculations shut down neatly and we can simply restart."""
+        try:
+            self.ctx.inputs.structure = calculation.outputs.output_structure
+        except exceptions.NotExistent:
+            self.ctx.restart_calc = calculation
+            self.ctx.inputs.metadata.options.max_wallclock_seconds = 3600
+            self.ctx.inputs.parameters['scf']['$kwargs']['maxiter'] = 100
+            self.report_error_handled(calculation, 'restart from the last calculation, set max_wallclock_seconds as 3600s, maxiter as 100')
+        else:
+            self.ctx.restart_calc = None
+            self.report_error_handled(calculation, 'out of walltime: structure changed, so restarting from scratch')
 
-    #     return ProcessHandlerReport(True)
+        return ProcessHandlerReport(True)

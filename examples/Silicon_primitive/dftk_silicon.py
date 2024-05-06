@@ -9,7 +9,7 @@ DFTKCalculation = CalculationFactory('dftk')
 code = orm.load_code('DFTK@local_direct')
 
 # load silicon structure
-cif = orm.CifData(file='/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida_dftk/examples/Silicon_primitive/Si.cif')
+cif = orm.CifData(file='/home/max/Desktop/Aiida_DFTK_Test/plugin_test/aiida-dftk/examples/Silicon_primitive/Si.cif')
 structure = cif.get_structure()
 
 # load parameters
@@ -27,6 +27,7 @@ parameters = orm.Dict({
     'scf': {
         '$function': 'self_consistent_field',
         'checkpointfile': 'scfres.jld2',
+        'save_ψ': True,
         '$kwargs': {
             'is_converged': {
                 '$symbol': 'ScfConvergenceEnergy',
@@ -39,6 +40,23 @@ parameters = orm.Dict({
         '$function': 'compute_forces_cart'
     }, {
         '$function': 'compute_stresses_cart'
+    }, {
+        '$function': 'compute_bands',
+        '$kwargs': {
+                'kpath': [
+                    [
+                        0.01,
+                        0.0,
+                        0.0
+                    ],
+                    [
+                        0.1,
+                        0.0,
+                        0.0
+                    ]
+                ]
+            }
+
     }]
 })
 
@@ -70,4 +88,4 @@ parameters_dict = {
 }
 
 # Run the calculation
-result = engine.run(DFTKCalculation, **parameters_dict)
+result = engine.submit(DFTKCalculation, **parameters_dict)
