@@ -23,7 +23,9 @@ BandsData = DataFactory('array.bands')
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
 
+    # TODO: I don't like this!
     _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
+    _DEFAULT_LOG_FILE_NAME = 'DFTK.log'
     _DEFAULT_ENERGY_UNIT = 'hartree'
     _DEFAULT_FORCE_FUNCNAME = 'compute_forces_cart'
     _DEFAULT_FORCE_UNIT = 'hartree/bohr'
@@ -34,60 +36,65 @@ class DftkParser(Parser):
 
     def parse(self, **kwargs):
         """Parse DFTK output files."""
-        try:
-            retrieved = self.retrieved
-        except NotExistent:
-            return self.exit_codes.ERROR_NO_RETRIEVED_FOLDER
+        # TODO: log recovery doesn't even seem to work? :(
+        if self._DEFAULT_LOG_FILE_NAME not in self.retrieved.base.repository.list_object_names():
+            return self.exit_codes.ERROR_MISSING_LOG_FILE
+        # TODO: maybe DFTK could log in a way that allows us to map its log levels to aiida's
+        self.logger.info(self.retrieved.base.repository.get_object_content(self._DEFAULT_LOG_FILE_NAME))
 
-        retrieve_list = self.node.get_attribute('retrieve_list')
-        with TemporaryDirectory() as dirpath:
-            retrieved.copy_tree(dirpath)
-
-            # if ran_out_of_walltime (terminated illy)
-            if self.node.exit_status == DftkCalculation.exit_codes.ERROR_SCHEDULER_OUT_OF_WALLTIME.status:
-                # if _DEFAULT_SCFRES_SUMMARY_NAME is not in the list retrieved.list_object_names(), SCF terminated illy
-                if self._DEFAULT_SCFRES_SUMMARY_NAME not in retrieved.list_object_names():
-                    return self.exit_codes.ERROR_SCF_OUT_OF_WALLTIME
-                # POSTSCF terminated illy
-                else:
-                    return self.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
+        # TODO: double check this if
+        # if ran_out_of_walltime (terminated illy)
+        if self.node.exit_status == DftkCalculation.exit_codes.ERROR_SCHEDULER_OUT_OF_WALLTIME.status:
+            # if _DEFAULT_SCFRES_SUMMARY_NAME is not in the list self.retrieved.list_object_names(), SCF terminated illy
+            if self._DEFAULT_SCFRES_SUMMARY_NAME not in self.retrieved.list_object_names():
+                return self.exit_codes.ERROR_SCF_OUT_OF_WALLTIME
+            # POSTSCF terminated illy
+            else:
+                return self.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
         
-            #catch exceptions from SCF, forces, stresses
-            # TODO: handle exceptions for future supported postscf (bands, dos)
-            if self._DEFAULT_SCFRES_SUMMARY_NAME in retrieve_list:
-                file_path = path.join(dirpath, self._DEFAULT_SCFRES_SUMMARY_NAME)
-                exit_code = self._parse_output_parameters(file_path)
-                if exit_code is not None:
-                    return exit_code
+        # Check retrieve list to know which files the calculation is expected to have produced.
+        try:
+            self._parse_optional_result(
+                self._DEFAULT_SCFRES_SUMMARY_NAME,
+                self.exit_codes.ERROR_MISSING_SCFRES_FILE,
+                self._parse_output_parameters,
+            )
 
-            if f'{self._DEFAULT_FORCE_FUNCNAME}.hdf5' in retrieve_list:
-                file_path = path.join(dirpath, f'{self._DEFAULT_FORCE_FUNCNAME}.hdf5')
-                exit_code = self._parse_output_forces(file_path)
-                if exit_code is not None:
-                    return exit_code
+            self._parse_optional_result(
+                f'{self._DEFAULT_FORCE_FUNCNAME}.hdf5',
+                self.exit_codes.ERROR_MISSING_FORCES_FILE,
+                self._parse_output_forces,
+            )
 
-            if f'{self._DEFAULT_STRESS_FUNCNAME}.hdf5' in retrieve_list:
-                file_path = path.join(dirpath, f'{self._DEFAULT_STRESS_FUNCNAME}.hdf5')
-                exit_code = self._parse_output_stresses(file_path)
-                if exit_code is not None:
-                    return exit_code
-                
-            #TODO: parser for bands results
-            if f'{self._DEFAULT_BANDS_FUNCNAME}.json' in retrieve_list:
-                file_path = path.join(dirpath, f'{self._DEFAULT_BANDS_FUNCNAME}.json')
-                exit_code = self._parse_output_bands(file_path)
-                if exit_code is not None:
-                    return exit_code
+            self._parse_optional_result(
+                f'{self._DEFAULT_STRESS_FUNCNAME}.hdf5',
+                self.exit_codes.ERROR_MISSING_STRESSES_FILE,
+                self._parse_output_stresses,
+            )
+
+            self._parse_optional_result(
+                f'{self._DEFAULT_BANDS_FUNCNAME}.json',
+                self.exit_codes.ERROR_MISSING_BANDS_FILE,
+                self._parse_output_bands,
+            )
+        except ParsingFailedException as e:
+            return e.exitcode
 
         return ExitCode(0)
 
+    def _parse_optional_result(self, file_name, missing_file_exitcode, parser):
+        # Files passed to the CalcInfo to be retrieved
+        retrieve_list = self.node.get_attribute('retrieve_list')
+        # Files that were actually retrieved
+        retrieved_files = self.retrieved.base.repository.list_object_names()
+
+        if file_name in retrieve_list:
+            if file_name not in retrieved_files:
+                raise ParsingFailedException(missing_file_exitcode)
+            with self.retrieved.base.repository.as_path(file_name) as file_path:
+                parser(file_path)
+
     def _parse_output_parameters(self, file_path):
-        """Parse the output file and return a dictionary with results.
-
-        :param output_file: Output file path
-        :return: Dictionary with results
-        """
-
         with open(file_path, 'r', encoding='utf-8') as json_file:
             data = json.load(json_file)
 
@@ -116,14 +123,6 @@ class DftkParser(Parser):
         return None
 
     def _parse_output_forces(self, file_path):
-        """Parse the output file and return a dictionary with results.
-
-        :param output_file: Output file path
-        :return: Dictionary with results
-        """
-        if not pl.Path(file_path).exists():
-            return self.exit_codes.ERROR_MISSING_FORCES_FILE
-
         with h5py.File(file_path, 'r') as h5file:
             force_dict = DftkParser._hdf5_to_dict(h5file)
 
@@ -134,14 +133,6 @@ class DftkParser(Parser):
         return None
 
     def _parse_output_stresses(self, file_path):
-        """Parse the output file and return a dictionary with results.
-
-        :param output_file: Output file path
-        :return: Dictionary with results
-        """
-        if not pl.Path(file_path).exists():
-            return self.exit_codes.ERROR_MISSING_STRESSES_FILE
-
         with h5py.File(file_path, 'r') as h5file:
             stress_dict = DftkParser._hdf5_to_dict(h5file)
 
@@ -151,11 +142,6 @@ class DftkParser(Parser):
         return None
     
     def _parse_output_bands(self, file_path):
-        """Parse the compute_bands.json output file and return a BandsData.
-
-        :param output_file: Output file path
-        :return: BandsData
-        """
         if not pl.Path(file_path).exists():
             return self.exit_codes.ERROR_MISSING_BANDS_FILE
 
@@ -198,3 +184,8 @@ class DftkParser(Parser):
             elif isinstance(item, h5py.Group):  # item is a group
                 result[key] = DftkParser._hdf5_to_dict(item)
         return result
+
+class ParsingFailedException(Exception):
+    def __init__(self, exitcode: ExitCode):
+        super().__init__(exitcode)
+        self.exitcode = exitcode

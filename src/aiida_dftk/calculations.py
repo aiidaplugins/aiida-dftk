@@ -55,10 +55,11 @@ class DftkCalculation(CalcJob):
         options['input_filename'].default = f'{cls._DEFAULT_PREFIX}.{cls._DEFAULT_INPUT_EXTENSION}'
 
         # Exit codes
-        spec.exit_code(100, 'ERROR_MISSING_SCFRES_FILE', message='The output file containing SCF results is missing.')
-        spec.exit_code(101, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
-        spec.exit_code(102, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
-        spec.exit_code(103, 'ERROR_MISSING_BANDS_FILE',message='The output file containing bands is missing.')
+        spec.exit_code(100, 'ERROR_MISSING_LOG_FILE', message='The output file containing DFTK logs is missing.')
+        spec.exit_code(101, 'ERROR_MISSING_SCFRES_FILE', message='The output file containing SCF results is missing.')
+        spec.exit_code(102, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
+        spec.exit_code(103, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
+        spec.exit_code(104, 'ERROR_MISSING_BANDS_FILE',message='The output file containing bands is missing.')
         spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge, and the POSTSCF functions were not executed.')
         spec.exit_code(501, 'ERROR_SCF_OUT_OF_WALLTIME',message='The SCF was interuptted due to out of walltime. Non-recovarable error.')
         spec.exit_code(502, 'ERROR_POSTSCF_OUT_OF_WALLTIME',message='The POSTSCF was interuptted due to out of walltime.')
@@ -222,7 +223,7 @@ class DftkCalculation(CalcJob):
         # write input file
         input_filename = folder.get_abs_path(self.metadata.options.input_filename)
         with io.open(input_filename, 'w', encoding='utf-8') as stream:
-            json.dump(input_filecontent, stream)
+            json.dump(input_filecontent, stream, indent=4)
 
         # List the files (scfres.jld2) to copy or symlink in the case of a restart
         if 'parent_folder' in self.inputs:
@@ -257,12 +258,10 @@ class DftkCalculation(CalcJob):
         codeinfo.code_uuid = self.inputs.code.uuid
         codeinfo.cmdline_params = cmdline_params
         codeinfo.stdout_name = f'{self._DEFAULT_PREFIX}.{self._DEFAULT_STDOUT_EXTENSION}'
-        codeinfo.withmpi = self.inputs.metadata.options.withmpi
 
         # Set up the `CalcInfo` so AiiDA knows what to do with everything
         calcinfo = datastructures.CalcInfo()
         calcinfo.codes_info = [codeinfo]
-        calcinfo.stdout_name = f'{self._DEFAULT_PREFIX}.{self._DEFAULT_STDOUT_EXTENSION}'
         calcinfo.retrieve_list = retrieve_list
         calcinfo.remote_symlink_list = remote_symlink_list
         calcinfo.remote_copy_list = remote_copy_list

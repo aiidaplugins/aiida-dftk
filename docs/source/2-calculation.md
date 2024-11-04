@@ -51,7 +51,7 @@ builder.dftk.pseudos = ppf.get_pseudos(structure=structure)
 # See some explanation below.
 builder.dftk.parameters = orm.Dict({
     "model_kwargs": {
-        "xc": [":gga_x_pbe", ":gga_c_pbe"],  # Exchange-correlation functional
+        "functionals": [":gga_x_pbe", ":gga_c_pbe"],  # Exchange-correlation functional
         "temperature": 0.001,                # Electronic temperature
         "smearing": {
             "$symbol": "Smearing.Gaussian"   # Type of smearing
@@ -91,7 +91,7 @@ as well as the [DFTK documentation](https://docs.dftk.org) for details.
 ---
 
 Instead of using the DFTK workchain (which automatically restarts and reschedules
-calculations) you can also run a single calculation only. THis is done by running
+calculations) you can also run a single calculation only. This is done by running
 DFTK `CalcJob`, which is done using the builder
 ```python
 from aiida.plugins import CalculationFactory
