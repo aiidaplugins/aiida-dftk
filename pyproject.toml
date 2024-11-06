@@ -29,7 +29,7 @@ dependencies = [
     'importlib_resources',
     'jsonschema',
     'numpy',
-    'packaging'
+    'packaging',
     'pymatgen',
 ]
 
