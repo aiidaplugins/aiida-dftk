@@ -1,4 +1,4 @@
-def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_mesh, load_psp, submit_and_await):
+def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_mesh, load_psp, submit_and_await_success):
     """
     Tests that a simple silicon SCF completes successfully and produces the expected outputs.
     """
@@ -41,7 +41,7 @@ def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_me
         ]
     })
 
-    result = submit_and_await(builder, timeout=180)
+    result = submit_and_await_success(builder, timeout=180)
 
     assert result.outputs.output_parameters.get_dict()["converged"]
     assert result.outputs.output_forces.get_array().shape == (2, 3)

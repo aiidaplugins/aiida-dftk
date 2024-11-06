@@ -1,4 +1,7 @@
+import logging
 import pytest
+
+_LOGGER = logging.getLogger(__name__)
 
 pytest_plugins = 'aiida.manage.tests.pytest_fixtures'
 
@@ -89,3 +92,35 @@ def load_psp():
 
     return _load_psp
 
+
+# TODO: Something like this should exist in aiida! We shouldn't have to do it ourselves just to capture why the test failed.
+@pytest.fixture
+def submit_and_await_success(submit_and_await):
+    """
+    Submits a process or process builder to the engine.
+    Validates that the process succeeds, or logs a report if it doesn't.
+    """
+
+    def _submit_and_await_success(*args, **kwargs):
+        from aiida.cmdline.utils.common import get_calcjob_report, get_workchain_report
+        from aiida.orm.nodes.process import CalcJobNode, WorkChainNode
+
+        result = submit_and_await(*args, **kwargs)
+
+        if result.exit_status != 0:
+            if isinstance(result, CalcJobNode):
+                _LOGGER.warning("Report of CalcJobNode:")
+                _LOGGER.warning(get_calcjob_report(result))
+            elif isinstance(result, WorkChainNode):
+                _LOGGER.warning("Report of WorkChainNode:")
+                _LOGGER.warning(get_workchain_report(result, "REPORT"))
+
+                # Also log reports of all child calcjobs:
+                for link in result.base.links.get_outgoing(CalcJobNode):
+                    if isinstance(link.node, CalcJobNode):
+                        _LOGGER.warning("Report of child CalcJobNode:")
+                        _LOGGER.warning(get_calcjob_report(link.node))
+
+            assert result.exit_status == 0
+
+    return _submit_and_await_success
