@@ -1,25 +1,31 @@
 import logging
+import os
 import pytest
 
-_LOGGER = logging.getLogger(__name__)
-
 pytest_plugins = 'aiida.manage.tests.pytest_fixtures'
+
+_LOGGER = logging.getLogger(__name__)
+_julia_project_path = os.path.join(__file__, "..", "julia_environment")
+
+
+def pytest_sessionstart():
+    """Instantiates the test Julia environment before any test runs."""
+    import subprocess
+
+    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.resolve();'], check=True)
+
 
 @pytest.fixture
 def get_dftk_code(aiida_local_code_factory):
     """Return an ``InstalledCode`` instance configured to run DFTK calculations on localhost."""
 
     def _get_code():
-        import os
-
-        project_path = os.path.join(__file__, "..", "julia_environment")
-
         return aiida_local_code_factory(
             'dftk',
             'julia',
             label='dftk',
             prepend_text=f"""\
-                export JULIA_PROJECT="{project_path}"
+                export JULIA_PROJECT="{_julia_project_path}"
             """,
         )
 
@@ -122,5 +128,7 @@ def submit_and_await_success(submit_and_await):
                         _LOGGER.warning(get_calcjob_report(link.node))
 
             assert result.exit_status == 0
+
+        return result
 
     return _submit_and_await_success
