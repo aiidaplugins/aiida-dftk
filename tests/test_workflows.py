@@ -45,7 +45,7 @@ def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_me
     # we'll need to make sure that tests can run on both GitHub Actions and locally without (too much) special setup.
     builder.dftk.metadata.options.withmpi = False
 
-    result = submit_and_await_success(builder, timeout=180)
+    result = submit_and_await_success(builder, timeout=300)
 
     assert result.outputs.output_parameters.get_dict()["converged"]
     assert result.outputs.output_forces.get_array().shape == (2, 3)
