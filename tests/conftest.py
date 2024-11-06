@@ -12,7 +12,8 @@ def pytest_sessionstart():
     """Instantiates the test Julia environment before any test runs."""
     import subprocess
 
-    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.resolve();'], check=True)
+    # Pkg.Registry.add() seems necessary for GitHub Actions
+    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.Registry.add(); Pkg.resolve();'], check=True)
 
 
 @pytest.fixture
