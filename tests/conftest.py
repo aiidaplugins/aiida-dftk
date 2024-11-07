@@ -48,6 +48,12 @@ def generate_structure():
             structure = StructureData(cell=cell)
             structure.append_atom(position=(0., 0., 0.), symbols='Si', name='Si')
             structure.append_atom(position=(param / 4., param / 4., param / 4.), symbols='Si', name='Si')
+        elif structure_id == 'silicon_perturbed':
+            param = 5.43
+            cell = [[param / 2., param / 2., 0], [param / 2., 0, param / 2.], [0, param / 2., param / 2.]]
+            structure = StructureData(cell=cell)
+            structure.append_atom(position=(0.05, 0., 0.), symbols='Si', name='Si')
+            structure.append_atom(position=(param / 4., param / 4., param / 4.), symbols='Si', name='Si')
         elif structure_id == 'water':
             structure = StructureData(cell=[[5.29177209, 0., 0.], [0., 5.29177209, 0.], [0., 0., 5.29177209]])
             structure.append_atom(position=[12.73464656, 16.7741411, 24.35076238], symbols='H', name='H')
