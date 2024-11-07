@@ -13,7 +13,7 @@ def pytest_sessionstart():
     import subprocess
 
     # Pkg.Registry.add() seems necessary for GitHub Actions
-    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.Registry.add(); Pkg.resolve();'], check=True)
+    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.Registry.add(); Pkg.resolve(); Pkg.precompile();'], check=True)
 
 
 @pytest.fixture

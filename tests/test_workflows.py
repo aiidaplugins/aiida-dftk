@@ -8,7 +8,7 @@ def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_me
     builder = DftkBaseWorkChain.get_builder()
     builder.dftk.code = get_dftk_code()
     builder.dftk.structure = generate_structure("silicon")
-    builder.kpoints = generate_kpoints_mesh(4)
+    builder.kpoints = generate_kpoints_mesh(3)
 
     builder.dftk.pseudos.Si = load_psp("Si")
 
