@@ -22,7 +22,7 @@ classifiers = [
 keywords = ['aiida', 'workflows']
 requires-python = '>=3.8'
 dependencies = [
-    'aiida_core[atomic_tools]>=2.0',
+    'aiida_core[atomic_tools]>=2.5',
     'aiida-pseudo',
     'click~=8.0',
     'h5py',
