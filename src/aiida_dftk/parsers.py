@@ -23,9 +23,7 @@ BandsData = DataFactory('array.bands')
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
 
-    # TODO: I don't like this!
-    _DEFAULT_SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
-    _DEFAULT_LOG_FILE_NAME = 'DFTK.log'
+    # TODO: DEFAULT_ prefix should be removed. I don't think that these names can be changed.
     _DEFAULT_ENERGY_UNIT = 'hartree'
     _DEFAULT_FORCE_FUNCNAME = 'compute_forces_cart'
     _DEFAULT_FORCE_UNIT = 'hartree/bohr'
@@ -36,17 +34,17 @@ class DftkParser(Parser):
 
     def parse(self, **kwargs):
         """Parse DFTK output files."""
-        # TODO: log recovery doesn't even seem to work? :(
-        if self._DEFAULT_LOG_FILE_NAME not in self.retrieved.base.repository.list_object_names():
+        log_file_name = DftkCalculation.get_log_file(self.node.get_options()["input_filename"])
+        if log_file_name not in self.retrieved.base.repository.list_object_names():
             return self.exit_codes.ERROR_MISSING_LOG_FILE
+        # TODO: how to make this log available? This unfortunately doesn't output to the process report.
         # TODO: maybe DFTK could log in a way that allows us to map its log levels to aiida's
-        self.logger.info(self.retrieved.base.repository.get_object_content(self._DEFAULT_LOG_FILE_NAME))
+        self.logger.info(self.retrieved.base.repository.get_object_content(log_file_name))
 
-        # TODO: double check this if
         # if ran_out_of_walltime (terminated illy)
         if self.node.exit_status == DftkCalculation.exit_codes.ERROR_SCHEDULER_OUT_OF_WALLTIME.status:
-            # if _DEFAULT_SCFRES_SUMMARY_NAME is not in the list self.retrieved.list_object_names(), SCF terminated illy
-            if self._DEFAULT_SCFRES_SUMMARY_NAME not in self.retrieved.list_object_names():
+            # if SCF summary file is not in the list of retrieved files, SCF terminated illy
+            if DftkCalculation.SCFRES_SUMMARY_NAME not in self.retrieved.list_object_names():
                 return self.exit_codes.ERROR_SCF_OUT_OF_WALLTIME
             # POSTSCF terminated illy
             else:
@@ -55,7 +53,7 @@ class DftkParser(Parser):
         # Check retrieve list to know which files the calculation is expected to have produced.
         try:
             self._parse_optional_result(
-                self._DEFAULT_SCFRES_SUMMARY_NAME,
+                DftkCalculation.SCFRES_SUMMARY_NAME,
                 self.exit_codes.ERROR_MISSING_SCFRES_FILE,
                 self._parse_output_parameters,
             )

@@ -38,7 +38,6 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
 
         spec.outline(
             cls.setup,
-            cls.validate_parameters,
             cls.validate_kpoints,
             cls.validate_pseudos,
             cls.validate_resources,
@@ -71,16 +70,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         self.ctx.restart_calc = None
         self.ctx.inputs = AttributeDict(self.exposed_inputs(DftkCalculation, 'dftk'))
 
-    def validate_parameters(self):
-        """Validate inputs that might depend on each other and cannot be validated by the spec.
-
-        Also define dictionary `inputs` in the context, that will contain the inputs for the calculation that will be
-        launched in the `run_calculation` step.
-        """
-        #super().setup()
-        self.ctx.inputs.parameters = self.ctx.inputs.parameters.get_dict()
-        self.ctx.inputs.settings = self.ctx.inputs.settings.get_dict() if 'settings' in self.ctx.inputs else {}
-
+    # TODO: We probably want to handle the kpoint distance on the Julia side instead.
     def validate_kpoints(self):
         """Validate the inputs related to k-points.
 
@@ -121,6 +111,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             return self.exit_codes.ERROR_INVALID_INPUT_PSEUDO_POTENTIALS  # pylint: disable=no-member
 
 
+    # TODO: This is weird. Shouldn't aiida already handle this internally?
     def validate_resources(self):
         """Validate the inputs related to the resources.
 
@@ -154,8 +145,7 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         :param calculation: the failed calculation node
         :param action: a string message with the action taken
         """
-        arguments = [calculation.process_label, calculation.pk, calculation.exit_status, calculation.exit_message]
-        self.report('{}<{}> failed with exit status {}: {}'.format(*arguments))
+        self.report(f'{calculation.process_label}<{calculation.pk}> failed with exit status {calculation.exit_status}: {calculation.exit_message}')
         self.report(f'Action taken: {action}')
 
     @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
@@ -164,12 +154,13 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         return None
 
     # Just as a blueprint, delete after ^ is implemented
+    # TODO: What exactly is this doing?
     @process_handler(priority=580, exit_codes=[
         DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED,
         DftkCalculation.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
         ])
     def handle_recoverable_SCF_unconverged_and_POSTSCF_out_of_walltime_(self, calculation):
-        """Handle `RROR_SCF_CONVERGENCE_NOT_REACHED` and `ERROR_POSTSCF_OUT_OF_WALLTIME` exit code: calculations shut down neatly and we can simply restart."""
+        """Handle `ERROR_SCF_CONVERGENCE_NOT_REACHED` and `ERROR_POSTSCF_OUT_OF_WALLTIME` exit code: calculations shut down neatly and we can simply restart."""
         try:
             self.ctx.inputs.structure = calculation.outputs.output_structure
         except exceptions.NotExistent:
