@@ -53,9 +53,7 @@ class DftkCalculation(CalcJob):
         options['withmpi'].default = True
 
         # Exit codes
-        # TODO: Log file should be removed in favor of using stdout. Needs a change in AiidaDFTK.jl.
-        # TODO: Code 100 is already used in the super class!
-        spec.exit_code(100, 'ERROR_MISSING_LOG_FILE', message='The output file containing DFTK logs is missing.')
+        # TODO: Codes 1xx are already used in the super class!
         spec.exit_code(101, 'ERROR_MISSING_SCFRES_FILE', message='The output file containing SCF results is missing.')
         spec.exit_code(102, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
         spec.exit_code(103, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
@@ -178,11 +176,6 @@ class DftkCalculation(CalcJob):
         cmd_params.extend(['-e', 'using AiidaDFTK; AiidaDFTK.run()', self.metadata.options.input_filename])
         return cmd_params
 
-    @staticmethod
-    def get_log_file(input_filename: str) -> str:
-        """Gets the name of the log file based on the name of the input file."""
-        return Path(input_filename).stem + '.log'
-
     def _generate_retrieve_list(self, parameters: orm.Dict) -> list:
         """Generate the list of files to retrieve based on the type of calculation requested in the input parameters.
 
@@ -195,7 +188,6 @@ class DftkCalculation(CalcJob):
             f"{item['$function']}.json" if item['$function'] == 'compute_bands' else f"{item['$function']}.hdf5"
             for item in parameters['postscf']
         ]
-        retrieve_list.append(DftkCalculation.get_log_file(self.inputs.metadata.options.input_filename))
         retrieve_list.append('timings.json')
         retrieve_list.append(f'{self.SCFRES_SUMMARY_NAME}')
         return retrieve_list

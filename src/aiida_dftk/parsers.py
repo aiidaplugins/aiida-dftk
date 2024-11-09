@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """`Parser` implementation for DFTK."""
 import json
-from os import path
 import pathlib as pl
-from tempfile import TemporaryDirectory
 import numpy as np
 
-from aiida.common.exceptions import NotExistent
 from aiida.engine import ExitCode
 from aiida.orm import ArrayData, Dict
 from aiida.parsers import Parser
@@ -34,13 +31,6 @@ class DftkParser(Parser):
 
     def parse(self, **kwargs):
         """Parse DFTK output files."""
-        log_file_name = DftkCalculation.get_log_file(self.node.get_options()["input_filename"])
-        if log_file_name not in self.retrieved.base.repository.list_object_names():
-            return self.exit_codes.ERROR_MISSING_LOG_FILE
-        # TODO: how to make this log available? This unfortunately doesn't output to the process report.
-        # TODO: maybe DFTK could log in a way that allows us to map its log levels to aiida's
-        self.logger.info(self.retrieved.base.repository.get_object_content(log_file_name))
-
         # if ran_out_of_walltime (terminated illy)
         if self.node.exit_status == DftkCalculation.exit_codes.ERROR_SCHEDULER_OUT_OF_WALLTIME.status:
             # if SCF summary file is not in the list of retrieved files, SCF terminated illy
