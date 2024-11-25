@@ -6,7 +6,7 @@ build-backend = 'flit_core.buildapi'
 name = 'aiida-dftk'
 dynamic = ['version']
 description = 'AiiDA plugin for DFTK'
-authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}, {name = 'Yihan Wu', email = 'yihan.wu@epfl.ch'}]
+authors = [{name = 'Austin Zadoks', email = 'austin.zadoks@epfl.ch'}, {name = 'Yihan Wu', email = 'yihan.wu@epfl.ch'}, {name = 'Bruno Ploumhans', email = 'bruno.ploumhans@epfl.ch'}]
 readme = 'README.md'
 license = {file = 'LICENSE'}
 classifiers = [

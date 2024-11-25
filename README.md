@@ -23,8 +23,9 @@ and usage of the AiiDA-DFTK plugin:
    Explore how to run a DFTK calculation using AiiDA's common workflow system.
 
 ## Contact
-AiiDA-DFTK is developed and maintained by:
+AiiDA-DFTK is currently maintained by:
+- **Bruno Ploumhans**: bruno.ploumhans@epfl.ch
 
+Former authors:
 - **Yihan Wu**: yihan.wu@epfl.ch
 - **Austin Zadoks**: austin.zadoks@epfl.ch
-- **Junfeng Qiao**: junfeng.qiao@epfl.ch
