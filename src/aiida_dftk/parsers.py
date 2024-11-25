@@ -72,7 +72,7 @@ class DftkParser(Parser):
 
     def _parse_optional_result(self, file_name, missing_file_exitcode, parser):
         # Files passed to the CalcInfo to be retrieved
-        retrieve_list = self.node.get_attribute('retrieve_list')
+        retrieve_list = self.node.base.attributes.get('retrieve_list')
         # Files that were actually retrieved
         retrieved_files = self.retrieved.base.repository.list_object_names()
 
