@@ -1,5 +1,0 @@
-[deps]
-AiidaDFTK = "26386dbc-b74b-4d9a-b75a-41d28ada84fc"
-
-[compat]
-AiidaDFTK = "0.1"
