@@ -42,7 +42,7 @@ class DftkParser(Parser):
         
         # Check error file
         try:
-            errors_log = self.retrieved.base.repository.get_object_content("errors.log")
+            errors_log = self.retrieved.base.repository.get_object_content(DftkCalculation.LOGFILE)
             if "Imports succeeded" not in errors_log:
                 return self.exit_codes.ERROR_PACKAGE_IMPORT_FAILED
         except FileNotFoundError:

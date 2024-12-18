@@ -19,6 +19,8 @@ _AIIDA_DFTK_MAX_VERSION = "0.2" # exclusive
 class DftkCalculation(CalcJob):
     """`CalcJob` implementation for DFTK."""
 
+    INPUT_FILENAME = 'run_dftk.json'
+    LOGFILE = 'run_dftk.log'
     SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     # TODO: don't limit postscf
     _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart', 'compute_bands']
@@ -48,7 +50,7 @@ class DftkCalculation(CalcJob):
         options = spec.inputs['metadata']['options']
 
         options['parser_name'].default = 'dftk'
-        options['input_filename'].default = f'run_dftk.json'
+        options['input_filename'].default = cls.INPUT_FILENAME
         options['max_wallclock_seconds'].default = 1800
 
         # TODO: Why is this here?
@@ -103,15 +105,19 @@ class DftkCalculation(CalcJob):
             )
 
     def _validate_inputs(self):
-        """Validate input parameters.
-
-        Check that the post-SCF function(s) are supported.
-        """
+        """Validate input parameters."""
         parameters = self.inputs.parameters.get_dict()
         if 'postscf' in parameters:
             for postscf in parameters['postscf']:
                 if postscf['$function'] not in self._SUPPORTED_POSTSCF:
                     raise exceptions.InputValidationError(f"Unsupported postscf function: {postscf['$function']}")
+
+        # We want the option to be set for `verdi calcjob inputcat` to work,
+        # but we don't allow overriding it because it would affect the name of the log file.
+        if self.metadata.options.input_filename != self.INPUT_FILENAME:
+            raise exceptions.InputValidationError(
+                f"Input filename must be {self.INPUT_FILENAME}. Was: {self.metadata.options.input_filename}"
+            )
 
     def _validate_pseudos(self):
         """Validate the pseudopotentials.
@@ -187,7 +193,7 @@ class DftkCalculation(CalcJob):
             f"{item['$function']}.json" if item['$function'] == 'compute_bands' else f"{item['$function']}.hdf5"
             for item in parameters['postscf']
         ]
-        retrieve_list.append('errors.log')
+        retrieve_list.append(self.LOGFILE)
         retrieve_list.append('timings.json')
         retrieve_list.append(f'{self.SCFRES_SUMMARY_NAME}')
         return retrieve_list
