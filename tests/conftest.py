@@ -20,7 +20,7 @@ def pytest_sessionstart():
 AiidaDFTK = "26386dbc-b74b-4d9a-b75a-41d28ada84fc"
 
 [compat]
-AiidaDFTK = "{aiida_dftk.calculations._AIIDA_DFTK_MIN_VERSION}"
+AiidaDFTK = "{aiida_dftk.calculations._AIIDA_DFTK_VERSION_SPEC}"
 """)
 
     # Pkg.Registry.add() seems necessary for GitHub Actions

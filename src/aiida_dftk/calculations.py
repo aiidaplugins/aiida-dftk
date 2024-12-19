@@ -12,8 +12,7 @@ from aiida_pseudo.data.pseudo import UpfData
 from pymatgen.core import units
 
 
-_AIIDA_DFTK_MIN_VERSION = "0.1.9" # inclusive
-_AIIDA_DFTK_MAX_VERSION = "0.2" # exclusive
+_AIIDA_DFTK_VERSION_SPEC = "0.1.9"
 
 
 class DftkCalculation(CalcJob):
@@ -241,8 +240,10 @@ class DftkCalculation(CalcJob):
         cmdline_params = [
             # Precompilation under MPI generally deadlocks. Make sure everything is already precompiled.
             '--compiled-modules=strict',
-            '-e', f'using AiidaDFTK; AiidaDFTK.run(; min_version=v"{_AIIDA_DFTK_MIN_VERSION}", max_version=v"{_AIIDA_DFTK_MAX_VERSION}")',
-            self.metadata.options.input_filename
+            '-e', 'using AiidaDFTK; AiidaDFTK.run("{}"; allowed_versions="{}")'.format(
+                self.metadata.options.input_filename,
+                _AIIDA_DFTK_VERSION_SPEC,
+            ),
         ]
 
         # prepare retrieve list
