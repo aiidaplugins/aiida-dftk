@@ -240,7 +240,7 @@ class DftkCalculation(CalcJob):
         cmdline_params = [
             # Precompilation under MPI generally deadlocks. Make sure everything is already precompiled.
             '--compiled-modules=strict',
-            '-e', 'using AiidaDFTK; AiidaDFTK.run("{}"; allowed_versions="{}")'.format(
+            '-e', 'using AiidaDFTK; AiidaDFTK.run(inputfile="{}", allowed_versions="{}")'.format(
                 self.metadata.options.input_filename,
                 _AIIDA_DFTK_VERSION_SPEC,
             ),
