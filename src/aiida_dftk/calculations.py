@@ -12,7 +12,7 @@ from aiida_pseudo.data.pseudo import UpfData
 from pymatgen.core import units
 
 
-_AIIDA_DFTK_VERSION_SPEC = "0.1.9"
+_AIIDA_DFTK_VERSION_SPEC = "0.2.0"
 
 
 class DftkCalculation(CalcJob):
@@ -156,16 +156,23 @@ class DftkCalculation(CalcJob):
 
         local_copy_pseudo_list = []
 
-        data = {'periodic_system': {}, 'model_kwargs': {}, 'basis_kwargs': {}, 'scf': {}, 'postscf': []}
+        data = {
+            'periodic_system': {},
+            'pseudopotentials': {},
+            'model_kwargs': {},
+            'basis_kwargs': {},
+            'scf': {},
+            'postscf': [],
+        }
         data['periodic_system']['bounding_box'] = [[x * units.ang_to_bohr for x in vec] for vec in structure.cell]
         data['periodic_system']['atoms'] = []
         for site in structure.sites:
             data['periodic_system']['atoms'].append({
                 'symbol': site.kind_name,
                 'position': [X * units.ang_to_bohr for X in list(site.position)],
-                'pseudopotential': f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
             })
-            pseudo = pseudos[site.kind_name]
+        for symbol, pseudo in pseudos.items():
+            data['pseudopotentials'][symbol] = f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'
             local_copy_pseudo_list.append((pseudo.uuid, pseudo.filename, f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'))
         data['basis_kwargs']['kgrid'], data['basis_kwargs']['kshift'] = kpoints.get_kpoints_mesh()
 
