@@ -282,7 +282,7 @@ class PrecompileCalculation(CalcJob):
         codeinfo = datastructures.CodeInfo()
         codeinfo.code_uuid = self.inputs.code.uuid
         codeinfo.cmdline_params = [
-            '-e', f'using AiidaDFTK; println("{self._SUCCESS_PRINT}")'
+            '-e', f'using Pkg; Pkg.precompile(; strict=true); using AiidaDFTK; println("{self._SUCCESS_PRINT}")'
         ]
         codeinfo.withmpi = False
 
