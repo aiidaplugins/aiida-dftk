@@ -2,18 +2,21 @@
 """Base DFTK WorkChain implementation."""
 from aiida import orm
 from aiida.common import AttributeDict, exceptions
-from aiida.engine import BaseRestartWorkChain, ProcessHandlerReport, process_handler, while_
+from aiida.engine import BaseRestartWorkChain, ProcessHandlerReport, process_handler, while_, if_, ToContext
 from aiida.plugins import CalculationFactory
 
 from aiida_dftk.utils import create_kpoints_from_distance, validate_and_prepare_pseudos_inputs
 
 DftkCalculation = CalculationFactory('dftk')
+PrecompileCalculation = CalculationFactory('dftk.precompile')
 
 
 class DftkBaseWorkChain(BaseRestartWorkChain):
     """Base DFTK Workchain to perform a DFT calculation. Validates parameters and restart."""
 
     _process_class = DftkCalculation
+
+    _attempted_precompilation_extra = "attempted_precompilation"
 
     @classmethod
     def define(cls, spec):
@@ -44,7 +47,12 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             while_(cls.should_run_process)(
                 cls.prepare_process,
                 cls.run_process,
-                cls.inspect_process,
+                if_(cls.should_attempt_precompilation)(
+                    cls.run_precompilation,
+                    cls.inspect_precompilation,
+                ).else_(
+                    cls.inspect_process,
+                )
             ),
             cls.results,
         )
@@ -59,6 +67,8 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
             message='Neither the `options` nor `automatic_parallelization` input was specified.')
         spec.exit_code(204, 'ERROR_INVALID_INPUT_RESOURCES_UNDERSPECIFIED',
             message='The `metadata.options` did not specify both `resources.num_machines` and `max_wallclock_seconds`.')
+        spec.exit_code(300, 'ERROR_PRECOMPILATION_FAILURE',
+            message='Failed to precompile AiidaDFTK. Typically indicates an environment issue.')
 
     def setup(self):
         """Call the `setup` of the `BaseRestartWorkChain` and then create the inputs dictionary in `self.ctx.inputs`.
@@ -146,7 +156,37 @@ class DftkBaseWorkChain(BaseRestartWorkChain):
         :param action: a string message with the action taken
         """
         self.report(f'{calculation.process_label}<{calculation.pk}> failed with exit status {calculation.exit_status}: {calculation.exit_message}')
-        self.report(f'Action taken: {action}')
+        self.report(f'action taken: {action}')
+
+    def should_attempt_precompilation(self):
+        if self.node.base.extras.get(self._attempted_precompilation_extra, False):
+            return False
+        node = self.ctx.children[self.ctx.iteration - 1]
+        return node.exit_code == DftkCalculation.exit_codes.ERROR_PACKAGE_IMPORT_FAILED
+
+    def run_precompilation(self):
+        self.node.base.extras.set(self._attempted_precompilation_extra, True)
+        calculation = self.ctx.children[self.ctx.iteration - 1]
+        self.report_error_handled(calculation, 'attempting to precompile')
+
+        node = self.submit(PrecompileCalculation, inputs={
+            "code": calculation.inputs.code,
+        })
+        self.report(f'launching {node.process_label}<{node.pk}>')
+
+        return ToContext(precompile_job=node)
+
+    def inspect_precompilation(self):
+        calculation = self.ctx.precompile_job
+
+        if calculation.exit_status != 0:
+            self.report(f'{calculation.process_label}<{calculation.pk}> failed with exit status {calculation.exit_status}: {calculation.exit_message}')
+            self.report(f'the issue can be diagnosed by running `verdi process report {calculation.pk}` and checking the logs.')
+            self.report('aborting workchain')
+            return self.exit_codes.ERROR_PRECOMPILATION_FAILURE
+
+        self.report(f'{calculation.process_label}<{calculation.pk}> succeeded. Resuming workchain iterations.')
+        return None
 
     @process_handler(priority=500, exit_codes=[DftkCalculation.exit_codes.ERROR_SCF_CONVERGENCE_NOT_REACHED])
     def handle_scf_convergence_not_reached(self, _):

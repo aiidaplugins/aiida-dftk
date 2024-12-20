@@ -40,6 +40,17 @@ class DftkParser(Parser):
             else:
                 return self.exit_codes.ERROR_POSTSCF_OUT_OF_WALLTIME
         
+        # Check error file
+        try:
+            errors_log = self.retrieved.base.repository.get_object_content(DftkCalculation.LOGFILE)
+            if "Imports succeeded" not in errors_log:
+                return self.exit_codes.ERROR_PACKAGE_IMPORT_FAILED
+        except FileNotFoundError:
+            return self.exit_codes.ERROR_PACKAGE_IMPORT_FAILED
+
+        if "Finished successfully" not in errors_log:
+            return self.exit_codes.ERROR_UNSPECIFIED
+
         # Check retrieve list to know which files the calculation is expected to have produced.
         try:
             self._parse_optional_result(

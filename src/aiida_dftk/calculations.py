@@ -4,18 +4,22 @@ import io
 import os
 import json
 import typing as ty
-from pathlib import Path
 
 from aiida import orm
 from aiida.common import datastructures, exceptions
-from aiida.engine import CalcJob
+from aiida.engine import CalcJob, ExitCode
 from aiida_pseudo.data.pseudo import UpfData
 from pymatgen.core import units
+
+
+_AIIDA_DFTK_VERSION_SPEC = "0.2.0"
 
 
 class DftkCalculation(CalcJob):
     """`CalcJob` implementation for DFTK."""
 
+    INPUT_FILENAME = 'run_dftk.json'
+    LOGFILE = 'run_dftk.log'
     SCFRES_SUMMARY_NAME = 'self_consistent_field.json'
     # TODO: don't limit postscf
     _SUPPORTED_POSTSCF = ['compute_forces_cart', 'compute_stresses_cart', 'compute_bands']
@@ -45,7 +49,7 @@ class DftkCalculation(CalcJob):
         options = spec.inputs['metadata']['options']
 
         options['parser_name'].default = 'dftk'
-        options['input_filename'].default = f'run_dftk.json'
+        options['input_filename'].default = cls.INPUT_FILENAME
         options['max_wallclock_seconds'].default = 1800
 
         # TODO: Why is this here?
@@ -62,6 +66,8 @@ class DftkCalculation(CalcJob):
         spec.exit_code(501, 'ERROR_SCF_OUT_OF_WALLTIME',message='The SCF was interuptted due to out of walltime. Non-recovarable error.')
         spec.exit_code(502, 'ERROR_POSTSCF_OUT_OF_WALLTIME',message='The POSTSCF was interuptted due to out of walltime.')
         spec.exit_code(503, 'ERROR_BANDS_CONVERGENCE_NOT_REACHED', message='The BANDS minimization cycle did not converge.')
+        # Significant errors but calculation can be used to restart
+        spec.exit_code(400, 'ERROR_PACKAGE_IMPORT_FAILED', message="Failed to import AiiDA DFTK or write first log message. Typically indicates an environment issue.")
 
         # Outputs
         spec.output('output_parameters', valid_type=orm.Dict, help='output parameters')
@@ -98,15 +104,19 @@ class DftkCalculation(CalcJob):
             )
 
     def _validate_inputs(self):
-        """Validate input parameters.
-
-        Check that the post-SCF function(s) are supported.
-        """
+        """Validate input parameters."""
         parameters = self.inputs.parameters.get_dict()
         if 'postscf' in parameters:
             for postscf in parameters['postscf']:
                 if postscf['$function'] not in self._SUPPORTED_POSTSCF:
                     raise exceptions.InputValidationError(f"Unsupported postscf function: {postscf['$function']}")
+
+        # We want the option to be set for `verdi calcjob inputcat` to work,
+        # but we don't allow overriding it because it would affect the name of the log file.
+        if self.metadata.options.input_filename != self.INPUT_FILENAME:
+            raise exceptions.InputValidationError(
+                f"Input filename must be {self.INPUT_FILENAME}. Was: {self.metadata.options.input_filename}"
+            )
 
     def _validate_pseudos(self):
         """Validate the pseudopotentials.
@@ -146,16 +156,23 @@ class DftkCalculation(CalcJob):
 
         local_copy_pseudo_list = []
 
-        data = {'periodic_system': {}, 'model_kwargs': {}, 'basis_kwargs': {}, 'scf': {}, 'postscf': []}
+        data = {
+            'periodic_system': {},
+            'pseudopotentials': {},
+            'model_kwargs': {},
+            'basis_kwargs': {},
+            'scf': {},
+            'postscf': [],
+        }
         data['periodic_system']['bounding_box'] = [[x * units.ang_to_bohr for x in vec] for vec in structure.cell]
         data['periodic_system']['atoms'] = []
         for site in structure.sites:
             data['periodic_system']['atoms'].append({
                 'symbol': site.kind_name,
                 'position': [X * units.ang_to_bohr for X in list(site.position)],
-                'pseudopotential': f'{self._PSEUDO_SUBFOLDER}{pseudos[site.kind_name].filename}'
             })
-            pseudo = pseudos[site.kind_name]
+        for symbol, pseudo in pseudos.items():
+            data['pseudopotentials'][symbol] = f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'
             local_copy_pseudo_list.append((pseudo.uuid, pseudo.filename, f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'))
         data['basis_kwargs']['kgrid'], data['basis_kwargs']['kshift'] = kpoints.get_kpoints_mesh()
 
@@ -170,12 +187,6 @@ class DftkCalculation(CalcJob):
 
         return data, local_copy_pseudo_list
 
-    def _generate_cmdline_params(self) -> ty.List[str]:
-        # Define the command based on the input settings
-        cmd_params = []
-        cmd_params.extend(['-e', 'using AiidaDFTK; AiidaDFTK.run()', self.metadata.options.input_filename])
-        return cmd_params
-
     def _generate_retrieve_list(self, parameters: orm.Dict) -> list:
         """Generate the list of files to retrieve based on the type of calculation requested in the input parameters.
 
@@ -188,6 +199,7 @@ class DftkCalculation(CalcJob):
             f"{item['$function']}.json" if item['$function'] == 'compute_bands' else f"{item['$function']}.hdf5"
             for item in parameters['postscf']
         ]
+        retrieve_list.append(self.LOGFILE)
         retrieve_list.append('timings.json')
         retrieve_list.append(f'{self.SCFRES_SUMMARY_NAME}')
         return retrieve_list
@@ -232,7 +244,14 @@ class DftkCalculation(CalcJob):
                 remote_copy_list.append(checkpointfile_info)
 
         # prepare command line parameters
-        cmdline_params = self._generate_cmdline_params()
+        cmdline_params = [
+            # Precompilation under MPI generally deadlocks. Make sure everything is already precompiled.
+            '--compiled-modules=strict',
+            '-e', 'using AiidaDFTK; AiidaDFTK.run(inputfile="{}", allowed_versions="{}")'.format(
+                self.metadata.options.input_filename,
+                _AIIDA_DFTK_VERSION_SPEC,
+            ),
+        ]
 
         # prepare retrieve list
         retrieve_list = self._generate_retrieve_list(self.inputs.parameters)
@@ -251,3 +270,52 @@ class DftkCalculation(CalcJob):
         calcinfo.local_copy_list = local_copy_list
 
         return calcinfo
+
+class PrecompileCalculation(CalcJob):
+    """Calcjob implementation to precompile AiidaDFTK."""
+
+    _SUCCESS_PRINT = "Import successful"
+
+    @classmethod
+    def define(cls, spec):
+        """Define the process specification."""
+        super().define(spec)
+
+        options = spec.inputs['metadata']['options']
+        options['resources'].default = {'num_machines': 1, 'num_mpiprocs_per_machine': 1}
+
+    def prepare_for_submission(self, folder):
+        # Set up the `CodeInfo` to pass to `CalcInfo`
+        codeinfo = datastructures.CodeInfo()
+        codeinfo.code_uuid = self.inputs.code.uuid
+        codeinfo.cmdline_params = [
+            '-e', f'using Pkg; Pkg.precompile(; strict=true); using AiidaDFTK; println("{self._SUCCESS_PRINT}")'
+        ]
+        codeinfo.withmpi = False
+
+        # Set up the `CalcInfo` so AiiDA knows what to do with everything
+        calcinfo = datastructures.CalcInfo()
+        calcinfo.codes_info = [codeinfo]
+
+        return calcinfo
+
+    # Easier to override the parse method than to write a parser.
+    def parse(self, *args, **kwargs):
+        exit_code = super().parse(*args, **kwargs)
+        if exit_code.status != 0:
+            return exit_code
+
+        retrieved = self.node.outputs.retrieved
+        filename_stdout = self.node.get_option('scheduler_stdout')
+
+        if filename_stdout is None:
+            self.report('could not determine `stdout` filename because `scheduler_stdout` option was not set.')
+        else:
+            try:
+                scheduler_stdout = retrieved.base.repository.get_object_content(filename_stdout, mode='r')
+                if self._SUCCESS_PRINT in scheduler_stdout:
+                    return ExitCode(0)
+            except FileNotFoundError:
+                self.report(f'could not parse scheduler output: the `{filename_stdout}` file is missing')
+
+        return self.exit_codes.ERROR_UNSPECIFIED
