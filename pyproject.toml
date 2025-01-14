@@ -65,6 +65,7 @@ aiida-dftk = 'aiida_dftk.cli:cmd_root'
 
 [project.entry-points.'aiida.calculations']
 'dftk' = 'aiida_dftk.calculations:DftkCalculation'
+'dftk.precompile' = 'aiida_dftk.calculations:PrecompileCalculation'
 
 [project.entry-points.'aiida.parsers']
 'dftk' = 'aiida_dftk.parsers:DftkParser'

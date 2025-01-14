@@ -1,19 +1,30 @@
 import logging
-import os
+from pathlib import Path
 import pytest
+
+import aiida_dftk.calculations
 
 pytest_plugins = 'aiida.manage.tests.pytest_fixtures'
 
 _LOGGER = logging.getLogger(__name__)
-_julia_project_path = os.path.join(__file__, "..", "julia_environment")
+_julia_project_path = Path(__file__).parent /  "julia_environment"
 
 
 def pytest_sessionstart():
     """Instantiates the test Julia environment before any test runs."""
     import subprocess
 
+    with open(_julia_project_path / "Project.toml", "w") as f:
+        f.write(f"""
+[deps]
+AiidaDFTK = "26386dbc-b74b-4d9a-b75a-41d28ada84fc"
+
+[compat]
+AiidaDFTK = "{aiida_dftk.calculations._AIIDA_DFTK_VERSION_SPEC}"
+""")
+
     # Pkg.Registry.add() seems necessary for GitHub Actions
-    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.Registry.add(); Pkg.resolve(); Pkg.precompile();'], check=True)
+    subprocess.run(['julia', f'--project={_julia_project_path}', '-e', 'using Pkg; Pkg.Registry.add(); Pkg.resolve();'], check=True)
 
 
 @pytest.fixture
