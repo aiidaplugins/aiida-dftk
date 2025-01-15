@@ -42,6 +42,7 @@ class DftkCalculation(CalcJob):
         # Inputs
         spec.input('structure', valid_type=orm.StructureData, help='structure')
         spec.input_namespace('pseudos', valid_type=UpfData, help='The pseudopotentials.', dynamic=True)
+        spec.input('pseudo_rcut', valid_type=orm.Float, required=False, help='rcut to use for the pseudopotentials, in atomic units')
         spec.input('kpoints', valid_type=orm.KpointsData, help='kpoint mesh or kpoint path')
         spec.input('parameters', valid_type=orm.Dict, help='input parameters')
         spec.input('parent_folder', valid_type=orm.RemoteData, required=False, help='A remote folder used for restarts.')
@@ -174,6 +175,8 @@ class DftkCalculation(CalcJob):
         for symbol, pseudo in pseudos.items():
             data['pseudopotentials'][symbol] = f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'
             local_copy_pseudo_list.append((pseudo.uuid, pseudo.filename, f'{self._PSEUDO_SUBFOLDER}{pseudo.filename}'))
+        if 'pseudo_rcut' in self.inputs:
+            data['pseudopotentials']['$kwargs'] = {'rcut': self.inputs.pseudo_rcut.value}
         data['basis_kwargs']['kgrid'], data['basis_kwargs']['kshift'] = kpoints.get_kpoints_mesh()
 
         # set the maxtime for the SCF cycle, with a margin of _MIN_OUTPUT_BUFFER_TIME and 10%, whichever leads to a larger margin
