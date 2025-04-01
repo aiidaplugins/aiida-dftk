@@ -76,6 +76,12 @@ class DftkParser(Parser):
                 self.exit_codes.ERROR_MISSING_BANDS_FILE,
                 self._parse_output_bands,
             )
+
+            self._parse_optional_result(
+                'refinement.json',
+                self.exit_codes.ERROR_MISSING_REFINEMENT_FILE,
+                self._parse_output_refinement,
+            )
         except ParsingFailedException as e:
             return e.exitcode
 
@@ -163,6 +169,12 @@ class DftkParser(Parser):
         bands_data.set_bands(bands, units=self._DEFAULT_BANDS_UNIT)
         self.out('output_bands', bands_data)
 
+        return None
+
+    def _parse_output_refinement(self, file_path):
+        with open(file_path, 'r') as f:
+            refinement_dict = json.load(f)
+        self.out('output_refinement', Dict(refinement_dict))
         return None
 
     @staticmethod
