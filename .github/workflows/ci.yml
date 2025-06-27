@@ -11,6 +11,8 @@ jobs:
         strategy:
             matrix:
                 python-version: ['3.9', '3.10', '3.11', '3.12']
+            # Don't cancel other jobs if one of them fails
+            fail-fast: false
 
         services:
             postgres:
@@ -24,7 +26,7 @@ jobs:
         -   uses: actions/checkout@v4
 
         -   name: Cache Python dependencies
-            uses: actions/cache@v1
+            uses: actions/cache@v4
             with:
                 path: ~/.cache/pip
                 key: pip-${{ matrix.python-version }}-tests-${{ hashFiles('**/setup.json') }}
