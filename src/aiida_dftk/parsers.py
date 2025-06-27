@@ -15,7 +15,7 @@ from aiida_dftk.calculations import DftkCalculation
 import h5py
 
 # DataFactory is used to create the BandsData object
-BandsData = DataFactory('array.bands')
+BandsData = DataFactory('core.array.bands')
 
 class DftkParser(Parser):
     """`Parser` implementation for DFTK."""
