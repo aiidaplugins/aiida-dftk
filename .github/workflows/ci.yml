@@ -21,7 +21,7 @@ jobs:
                 -   5672:5672
 
         steps:
-        -   uses: actions/checkout@v2
+        -   uses: actions/checkout@v4
 
         -   name: Cache Python dependencies
             uses: actions/cache@v1
