@@ -85,7 +85,7 @@ result = engine.run(builder)
 Note that the parameters specified above as an `orm.Dict` are thin
 wrappers around the arguments and keyword arguments of appropriate
 Julia functions in DFTK.
-See the [`AiidaDFTK` documentation](https://mfherbst.github.io/AiidaDFTK.jl/stable/input_output/)
+See the [`AiidaDFTK` documentation](https://epfl-matmat.github.io/AiidaDFTK.jl/stable/input_output/)
 as well as the [DFTK documentation](https://docs.dftk.org) for details.
 
 ---
