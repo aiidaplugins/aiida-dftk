@@ -39,7 +39,15 @@ def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_me
             {
                 "$function": "compute_stresses_cart"
             },
-        ]
+        ],
+        "refinement": {
+            "basis_kwargs": {
+                "Ecut": 40,
+            },
+            "$kwargs": {
+                "tol": 1e-12,
+            },
+        },
     })
 
     # Disable MPI for now. If we ever enable MPI,
@@ -66,3 +74,6 @@ def test_silicon_workflow(get_dftk_code, generate_structure, generate_kpoints_me
     assert_allclose(output_parameters["energies"]["total"], _REFERENCE_ENERGY, rtol=1e-2)
     assert_allclose(result.outputs.output_forces.get_array(), _REFERENCE_FORCES, rtol=1e-2)
     assert_allclose(result.outputs.output_stresses.get_array(), _REFERENCE_STRESSES, rtol=1e-2)
+
+    refinement_output = result.outputs.output_refinement.get_dict()
+    assert_allclose(refinement_output["E_refined_new"][0], -8.43893821)
