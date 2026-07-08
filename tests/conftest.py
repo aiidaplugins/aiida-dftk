@@ -4,7 +4,7 @@ import pytest
 
 import aiida_dftk.calculations
 
-pytest_plugins = 'aiida.manage.tests.pytest_fixtures'
+pytest_plugins = 'aiida.tools.pytest_fixtures'
 
 _LOGGER = logging.getLogger(__name__)
 _julia_project_path = Path(__file__).parent /  "julia_environment"
@@ -28,14 +28,14 @@ AiidaDFTK = "{aiida_dftk.calculations._AIIDA_DFTK_VERSION_SPEC}"
 
 
 @pytest.fixture
-def get_dftk_code(aiida_local_code_factory):
+def get_dftk_code(aiida_code_installed):
     """Return an ``InstalledCode`` instance configured to run DFTK calculations on localhost."""
 
     def _get_code():
-        return aiida_local_code_factory(
-            'dftk',
-            'julia',
+        return aiida_code_installed(
             label='dftk',
+            default_calc_job_plugin='dftk',
+            filepath_executable='julia',
             prepend_text=f"""\
                 export JULIA_PROJECT="{_julia_project_path}"
             """,
@@ -115,6 +115,15 @@ def load_psp():
             return UpfData(stream)
 
     return _load_psp
+
+
+# Override the default aiida_profile fixture to use a rabbitmq profile
+# so we can submit workchains and wait for them to complete.
+# Not ideal but whatever...
+@pytest.fixture(scope="session", autouse=True)
+def aiida_profile(aiida_config, aiida_profile_factory):
+    with aiida_profile_factory(aiida_config, broker_backend="core.rabbitmq") as profile:
+        yield profile
 
 
 # TODO: Something like this should exist in aiida! We shouldn't have to do it ourselves just to capture why the test failed.
