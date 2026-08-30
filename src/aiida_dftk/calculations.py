@@ -63,6 +63,7 @@ class DftkCalculation(CalcJob):
         spec.exit_code(102, 'ERROR_MISSING_FORCES_FILE', message='The output file containing forces is missing.')
         spec.exit_code(103, 'ERROR_MISSING_STRESSES_FILE', message='The output file containing stresses is missing.')
         spec.exit_code(104, 'ERROR_MISSING_BANDS_FILE',message='The output file containing bands is missing.')
+        spec.exit_code(105, 'ERROR_MISSING_REFINEMENT_FILE', message='The output file containing refinement data is missing.')
         spec.exit_code(500, 'ERROR_SCF_CONVERGENCE_NOT_REACHED', message='The SCF minimization cycle did not converge, and the POSTSCF functions were not executed.')
         spec.exit_code(501, 'ERROR_SCF_OUT_OF_WALLTIME',message='The SCF was interuptted due to out of walltime. Non-recovarable error.')
         spec.exit_code(502, 'ERROR_POSTSCF_OUT_OF_WALLTIME',message='The POSTSCF was interuptted due to out of walltime.')
@@ -81,6 +82,7 @@ class DftkCalculation(CalcJob):
         spec.output('output_forces', valid_type=orm.ArrayData, required=False, help='forces array')
         spec.output('output_stresses', valid_type=orm.ArrayData, required=False, help='stresses array')
         spec.output('output_bands', valid_type=orm.BandsData, required=False, help='bandstructure')
+        spec.output('output_refinement', valid_type=orm.Dict, required=False, help='refinement')
 
         # TODO: bands and DOS implementation required on DFTK side
         # spec.output('output_bands', valid_type=orm.BandsData, required=False,
@@ -202,6 +204,8 @@ class DftkCalculation(CalcJob):
             f"{item['$function']}.json" if item['$function'] == 'compute_bands' else f"{item['$function']}.hdf5"
             for item in parameters['postscf']
         ]
+        if 'refinement' in parameters:
+            retrieve_list.append('refinement.json')
         retrieve_list.append(self.LOGFILE)
         retrieve_list.append('timings.json')
         retrieve_list.append(f'{self.SCFRES_SUMMARY_NAME}')
